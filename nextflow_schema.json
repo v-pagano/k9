@@ -1,0 +1,126 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/YOUR_PIPELINE/master/nextflow_schema.json",
+    "title": "Nextflow pipeline parameters",
+    "description": "This pipeline uses Nextflow and processes some kind of data. The JSON Schema was built using the nf-core pipeline schema builder.",
+    "type": "object",
+    "definitions": {
+        "general": {
+            "title": "General Setup",
+            "type": "object",
+            "required": [
+                "input",
+                "pipeline_type",
+                "mapping_type"
+            ],
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "description": "List of your input files. This can be in either csv, tsv or phoenix json format."
+                },
+                "pipeline_type": {
+                    "type": "string",
+                    "description": "Which Pipeline are you running?",
+                    "default": "Alignment",
+                    "enum": [
+                        "Alignment",
+                        "Constitutional",
+                        "Somatic"
+                    ]
+                }
+            }
+        },
+        "variantcallers": {
+            "title": "Variant Callers",
+            "type": "object",
+            "properties": {
+                "haplotypecaller": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "deepvariant": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "pb_haplotypecaller": {
+                    "type": "boolean",
+                    "description": "Parabricks GPU-accelerated haplotype caller",
+                    "default": false
+                },
+                "pb_deepvariant": {
+                    "type": "boolean",
+                    "description": "Parabricks GPU-accelerated deepvariant",
+                    "default": false
+                }
+            }
+        },
+        "annotation": {
+            "title": "Variant Annotation",
+            "type": "object",
+            "properties": {
+                "snpeff": {
+                    "type": "boolean",
+                    "default": false
+                },
+                "vep": {
+                    "type": "boolean",
+                    "default": false
+                }
+            }
+        },
+        "optional": {
+            "title": "Optional settings",
+            "type": "object",
+            "properties": {
+                "publishResults": {
+                    "type": "boolean",
+                    "description": "Would you like your output files (BAM, VCF, etc.) copied to a separate folder?",
+                    "default": false
+                },
+                "outputFolder": {
+                    "type": "string",
+                    "description": "If you selected publishResults, where would you like them copied?"
+                },
+                "accelerated": {
+                    "type": "boolean",
+                    "description": "Would you like your pipeline to run faster?",
+                    "default": true
+                },
+                "reference": {
+                    "type": "string",
+                    "description": "Reference for BWA and BWA2?",
+                    "hidden": true
+                },
+                "pb_reference": {
+                    "type": "string",
+                    "description": "Reference for Parabricks?",
+                    "hidden": true
+                },
+                "mapping_type": {
+                    "type": "string",
+                    "description": "Which mapper would you like to use?",
+                    "default": "parabricks",
+                    "enum": [
+                        "parabricks",
+                        "bwa",
+                        "bwa2"
+                    ]
+                }
+            }
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/general"
+        },
+        {
+            "$ref": "#/definitions/variantcallers"
+        },
+        {
+            "$ref": "#/definitions/annotation"
+        },
+        {
+            "$ref": "#/definitions/optional"
+        }
+    ]
+}

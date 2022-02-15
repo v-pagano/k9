@@ -1,0 +1,22 @@
+Please visit https://docs.nvidia.com/clara/#parabricks for detailed documentation
+
+
+[Parabricks Options Mesg]: Read group created for /scratch/vpagano/play/SRR10351554.sra_1_100K.fastq.gz and
+/scratch/vpagano/play/SRR10351554.sra_2_100K.fastq.gz
+[Parabricks Options Mesg]: @RG\tID:SUPERFQS01_1_K18088\tLB:K18088\tPU:SUPERFQS01_1\tSM:GIAB_NA12878_1_CL_Whole_C1\tPL:IL
+LUMINA\tCN:tgen\tPM:HiSeq2500\tBC:Unknown
+
+[Parabricks Options Mesg]: Checking argument compatibility
+[Parabricks Options Mesg]: Read group created for /scratch/vpagano/play/SRR10351554.sra_1_100K.fastq.gz and
+/scratch/vpagano/play/SRR10351554.sra_2_100K.fastq.gz
+[Parabricks Options Mesg]: @RG\tID:SUPERFQS01_1_K18088\tLB:K18088\tPU:SUPERFQS01_1\tSM:GIAB_NA12878_1_CL_Whole_C1\tPL:IL
+LUMINA\tCN:tgen\tPM:HiSeq2500\tBC:Unknown
+For technical support, updated user guides and other Parabricks documentation can be found at https://docs.nvidia.com/clara/#parabricks
+Answers to most FAQ’s can be found on the developer forum https://forums.developer.nvidia.com/c/healthcare/Parabricks/290
+Customers with paid Parabricks licenses have direct access to support and can contact EnterpriseSupport@nvidia.com
+Users of free evaluation licenses can contact parabricks-eval-support@nvidia.com for troubleshooting any questions.
+Exiting...
+
+
+Could not run fq2bam as part of germline pipeline
+Exiting pbrun ...

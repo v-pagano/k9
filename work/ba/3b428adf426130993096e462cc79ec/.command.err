@@ -1,0 +1,19 @@
+3.6.3(10):ERROR:150: Module '3.6.3' conflicts with the currently loaded module(s) 'singularity/3.8.4'
+3.6.3(10):ERROR:102: Tcl command execution failed: conflict singularity
+
+[PB Warning 2022-Feb-15 14:39:24][licenseManager.cpp:216] Logger not initialized! ------------------------------------------------------------------------------
+[PB Info 2022-Feb-15 14:39:24] ------------------------------------------------------------------------------
+[PB Info 2022-Feb-15 14:39:24] ||                 Parabricks accelerated Genomics Pipeline                 ||
+[PB Info 2022-Feb-15 14:39:24] ||                           Version 3.7.0-1.beta1                          ||
+[PB Info 2022-Feb-15 14:39:24] ||                       GPU-BWA mem, Sorting Phase-I                       ||
+[PB Info 2022-Feb-15 14:39:24] ||                  Contact: Parabricks-Support@nvidia.com                  ||
+[PB Info 2022-Feb-15 14:39:24] ------------------------------------------------------------------------------
+[PB Warning 2022-Feb-15 14:39:25][:0] Error logger already initialized.  Continuing anyway.
+[E::bwa_idx_load_from_disk] fail to locate the index files
+[PB Info 2022-Feb-15 14:39:25] ------------------------------------------------------------------------------
+[PB Info 2022-Feb-15 14:39:25] ||        Program:                      GPU-BWA mem, Sorting Phase-I        ||
+[PB Info 2022-Feb-15 14:39:25] ||        Version:                                     3.7.0-1.beta1        ||
+[PB Info 2022-Feb-15 14:39:25] ||        Start Time:                       Tue Feb 15 14:39:24 2022        ||
+[PB Info 2022-Feb-15 14:39:25] ||        End Time:                         Tue Feb 15 14:39:25 2022        ||
+[PB Info 2022-Feb-15 14:39:25] ||        Total Time:                                       1 second        ||
+[PB Info 2022-Feb-15 14:39:25] ------------------------------------------------------------------------------

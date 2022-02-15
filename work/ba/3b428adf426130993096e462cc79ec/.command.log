@@ -1,0 +1,41 @@
+3.6.3(10):ERROR:150: Module '3.6.3' conflicts with the currently loaded module(s) 'singularity/3.8.4'
+3.6.3(10):ERROR:102: Tcl command execution failed: conflict singularity
+
+Please visit https://docs.nvidia.com/clara/#parabricks for detailed documentation
+
+
+[Parabricks Options Mesg]: Read group created for /scratch/vpagano/play/SRR10351554.sra_1_100K.fastq.gz and
+/scratch/vpagano/play/SRR10351554.sra_2_100K.fastq.gz
+[Parabricks Options Mesg]: @RG\tID:SUPERFQS01_1_K18088\tLB:K18088\tPU:SUPERFQS01_1\tSM:GIAB_NA12878_1_CL_Whole_C1\tPL:IL
+LUMINA\tCN:tgen\tPM:HiSeq2500\tBC:Unknown
+
+[Parabricks Options Mesg]: Checking argument compatibility
+[Parabricks Options Mesg]: Read group created for /scratch/vpagano/play/SRR10351554.sra_1_100K.fastq.gz and
+/scratch/vpagano/play/SRR10351554.sra_2_100K.fastq.gz
+[Parabricks Options Mesg]: @RG\tID:SUPERFQS01_1_K18088\tLB:K18088\tPU:SUPERFQS01_1\tSM:GIAB_NA12878_1_CL_Whole_C1\tPL:IL
+LUMINA\tCN:tgen\tPM:HiSeq2500\tBC:Unknown
+[PB Warning 2022-Feb-15 14:39:24][licenseManager.cpp:216] Logger not initialized! ------------------------------------------------------------------------------
+[PB Info 2022-Feb-15 14:39:24] ------------------------------------------------------------------------------
+[PB Info 2022-Feb-15 14:39:24] ||                 Parabricks accelerated Genomics Pipeline                 ||
+[PB Info 2022-Feb-15 14:39:24] ||                           Version 3.7.0-1.beta1                          ||
+[PB Info 2022-Feb-15 14:39:24] ||                       GPU-BWA mem, Sorting Phase-I                       ||
+[PB Info 2022-Feb-15 14:39:24] ||                  Contact: Parabricks-Support@nvidia.com                  ||
+[PB Info 2022-Feb-15 14:39:24] ------------------------------------------------------------------------------
+[PB Warning 2022-Feb-15 14:39:25][:0] Error logger already initialized.  Continuing anyway.
+[E::bwa_idx_load_from_disk] fail to locate the index files
+[PB Info 2022-Feb-15 14:39:25] ------------------------------------------------------------------------------
+[PB Info 2022-Feb-15 14:39:25] ||        Program:                      GPU-BWA mem, Sorting Phase-I        ||
+[PB Info 2022-Feb-15 14:39:25] ||        Version:                                     3.7.0-1.beta1        ||
+[PB Info 2022-Feb-15 14:39:25] ||        Start Time:                       Tue Feb 15 14:39:24 2022        ||
+[PB Info 2022-Feb-15 14:39:25] ||        End Time:                         Tue Feb 15 14:39:25 2022        ||
+[PB Info 2022-Feb-15 14:39:25] ||        Total Time:                                       1 second        ||
+[PB Info 2022-Feb-15 14:39:25] ------------------------------------------------------------------------------
+For technical support, updated user guides and other Parabricks documentation can be found at https://docs.nvidia.com/clara/#parabricks
+Answers to most FAQ’s can be found on the developer forum https://forums.developer.nvidia.com/c/healthcare/Parabricks/290
+Customers with paid Parabricks licenses have direct access to support and can contact EnterpriseSupport@nvidia.com
+Users of free evaluation licenses can contact parabricks-eval-support@nvidia.com for troubleshooting any questions.
+Exiting...
+
+
+Could not run fq2bam as part of germline pipeline
+Exiting pbrun ...
