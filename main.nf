@@ -116,66 +116,74 @@ include { VARIANTCALLERS_NORMAL; VARIANTCALLERS_TUMOR } from './workflows/varian
 include { ANNOTATION_NORMAL; ANNOTATION_TUMOR } from './workflows/annotation'
 include { PB_HAPLOTYPECALLER; PB_DEEPVARIANT; PB_SOMATIC } from './workflows/parabricks'
 include { PUBLISH_RESULTS } from './workflows/helpers'
+include { pb_germline } from './process/parabricks'
 
 workflow {
-    inputType = typeOfInput(params.input)
-    switch (inputType) {
-        case 'json':
-            fileList = readJsonFile(params.input).fileList
-            break        
-        case 'csv':
-            fileList = readCsvFile(params.input, 'csv')
-            break
-        case 'tsv':
-            fileList = readCsvFile(params.input, 'tsv')
-            break
+
+    if (params.fastq) {
+        fastqs = Channel.fromFilePairs(params.input + '/*_{1,2}.fastq.gz')
+        pb_germline(fastqs)
+    } else {
+
+        inputType = typeOfInput(params.input)
+        switch (inputType) {
+            case 'json':
+                fileList = readJsonFile(params.input).fileList
+                break        
+            case 'csv':
+                fileList = readCsvFile(params.input, 'csv')
+                break
+            case 'tsv':
+                fileList = readCsvFile(params.input, 'tsv')
+                break
+        }
+
+        tumorList = fileList.findAll { it.status.toString() == '1' }
+        normalList = fileList.findAll { it.status.toString() == '0' }
+        tumorSample = tumorList.collect { it.sample }.unique()
+        normalSample = normalList.collect { it.sample }.unique()
+
+        publishList = Channel.empty()
+
+        switch (params.pipeline_type) {
+            case 'Alignment':
+                if (tumorList.size() > 0) {
+                    MAPPING_TUMOR(tumorList)
+                    publishList = publishList.concat(MAPPING_TUMOR.out)
+                }
+                if (normalList.size() > 0) {
+                    MAPPING_NORMAL(normalList)
+                    publishList = publishList.concat(MAPPING_NORMAL.out)
+                }
+                break
+            case 'Constitutional':
+                if (tumorList.size() > 0) {
+                    MAPPING_TUMOR(tumorList)
+                    VARIANTCALLERS_TUMOR(MAPPING_TUMOR.out, tumorSample[0])
+                    ANNOTATION_TUMOR(VARIANTCALLERS_TUMOR.out, tumorSample[0])
+                    publishList = publishList.concat(MAPPING_TUMOR.out)
+                    publishList = publishList.concat(VARIANTCALLERS_TUMOR.out)
+                    publishList = publishList.concat(ANNOTATION_TUMOR.out)
+                }
+                if (normalList.size() > 0) {
+                    MAPPING_NORMAL(normalList)
+                    VARIANTCALLERS_NORMAL(MAPPING_NORMAL.out, normalSample[0])
+                    ANNOTATION_NORMAL(VARIANTCALLERS_NORMAL.out, normalSample[0])
+                    publishList = publishList.concat(MAPPING_NORMAL.out)
+                    publishList = publishList.concat(VARIANTCALLERS_NORMAL.out)
+                    publishList = publishList.concat(ANNOTATION_NORMAL.out)
+                }
+                break
+            case 'Somatic':
+                if (params.accelerated) {
+                    PB_SOMATIC(normalList, normalSample[0], tumorList, tumorSample[0])
+                    publishList = publishList.concat(PB_SOMATIC.out)
+                }
+                break
+
+        }
+
+        //Publish all of the files to the final output directory
+        PUBLISH_RESULTS(publishList.flatten())
     }
-
-    tumorList = fileList.findAll { it.status.toString() == '1' }
-    normalList = fileList.findAll { it.status.toString() == '0' }
-    tumorSample = tumorList.collect { it.sample }.unique()
-    normalSample = normalList.collect { it.sample }.unique()
-
-    publishList = Channel.empty()
-
-    switch (params.pipeline_type) {
-        case 'Alignment':
-            if (tumorList.size() > 0) {
-                MAPPING_TUMOR(tumorList)
-                publishList = publishList.concat(MAPPING_TUMOR.out)
-            }
-            if (normalList.size() > 0) {
-                MAPPING_NORMAL(normalList)
-                publishList = publishList.concat(MAPPING_NORMAL.out)
-            }
-            break
-        case 'Constitutional':
-            if (tumorList.size() > 0) {
-                MAPPING_TUMOR(tumorList)
-                VARIANTCALLERS_TUMOR(MAPPING_TUMOR.out, tumorSample[0])
-                ANNOTATION_TUMOR(VARIANTCALLERS_TUMOR.out, tumorSample[0])
-                publishList = publishList.concat(MAPPING_TUMOR.out)
-                publishList = publishList.concat(VARIANTCALLERS_TUMOR.out)
-                publishList = publishList.concat(ANNOTATION_TUMOR.out)
-            }
-            if (normalList.size() > 0) {
-                MAPPING_NORMAL(normalList)
-                VARIANTCALLERS_NORMAL(MAPPING_NORMAL.out, normalSample[0])
-                ANNOTATION_NORMAL(VARIANTCALLERS_NORMAL.out, normalSample[0])
-                publishList = publishList.concat(MAPPING_NORMAL.out)
-                publishList = publishList.concat(VARIANTCALLERS_NORMAL.out)
-                publishList = publishList.concat(ANNOTATION_NORMAL.out)
-            }
-            break
-        case 'Somatic':
-            if (params.accelerated) {
-                PB_SOMATIC(normalList, normalSample[0], tumorList, tumorSample[0])
-                publishList = publishList.concat(PB_SOMATIC.out)
-            }
-            break
-
-    }
-
-    //Publish all of the files to the final output directory
-    PUBLISH_RESULTS(publishList.flatten())
 }

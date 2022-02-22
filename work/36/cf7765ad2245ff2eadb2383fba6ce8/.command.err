@@ -1,2 +1,0 @@
-ModuleCmd_Load.c(208):ERROR:105: Unable to locate a modulefile for 'parabricks/parabricks/3.7.0-1.beta1_V100'
-/home/vpagano/tardis/work/36/cf7765ad2245ff2eadb2383fba6ce8/.command.sh: line 4: pbrun: command not found

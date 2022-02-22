@@ -96,22 +96,22 @@ process pb_haplotypecaller {
 
 process pb_germline {
     input:
-        val fq
-        val sampleName
+        each fq
     output:
-        file "${sampleName}*"
+        file "${fq[0]}*"
 
     queue params.gpuPartition
     clusterOptions '--exclusive'
+    publishDir '/scratch/vpagano/results/canine', mode: 'copy', overwrite: 'true'
 
     script:
     """
         source /etc/profile.d/modules.sh
         module load parabricks/${params.pb_ver} 
         pbrun germline --bwa-options '-K 100000000 -Y' --ref ${params.pb_reference} \
-        ${fq} \
-        --out-bam '${sampleName}.bam' \
-        --out-variants '${sampleName}_pb_haplotypecaller.vcf' \
+        --in-fq ${fq[1][0]} ${fq[1][1]} \
+        --out-bam '${fq[0]}.bam' \
+        --out-variants '${fq[0]}_pb_haplotypecaller.vcf' \
         --tmp-dir /scratch/vpagano/tmp
     """
 
