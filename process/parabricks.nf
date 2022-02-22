@@ -7,13 +7,12 @@ process pb_fq2bam {
         file "${fq[0]}*"
 
     queue params.gpuPartition
-    clusterOptions '--exclusive'
+    clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
     when:
         params.mapping_type == 'parabricks'
 
     script:
-        println(fq)
     """
         source /etc/profile.d/modules.sh
         module load parabricks/${params.pb_ver} 
@@ -32,7 +31,7 @@ process pb_rna_fq2bam {
         tuple file('merged.bam'), file('results/*')
 
     queue params.gpuPartition
-    clusterOptions '--exclusive'
+    clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
     script:
     """
@@ -58,7 +57,7 @@ process pb_deepvariant {
         file "${bam.baseName}*"
 
     queue params.gpuPartition
-    clusterOptions '--exclusive'
+    clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
     when:
         params.pb_deepvariant
@@ -82,7 +81,7 @@ process pb_haplotypecaller {
         file "${bam.baseName}*"
 
     queue params.gpuPartition
-    clusterOptions '--exclusive'
+    clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
     when:
         params.pb_haplotypecaller
@@ -107,8 +106,8 @@ process pb_germline {
         file "${fq[0]}*"
 
     queue params.gpuPartition
-    clusterOptions '--exclusive'
-    publishDir '/scratch/vpagano/results/canine', mode: 'copy', overwrite: 'true'
+    clusterOptions "--exclusive ${params.gpuClusterOptions}"
+    publishDir params.outputFolder, mode: 'copy', overwrite: 'true'
 
     when:
         params.mapping_type == 'parabricks' && params.pb_haplotypecaller
@@ -136,7 +135,7 @@ process pb_somatic {
         tuple file("${sampleNameTumor}*"), file("${sampleNameNormal}*")
         
     queue params.gpuPartition
-    clusterOptions '--exclusive'
+    clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
     script:
     """
@@ -162,7 +161,7 @@ process mutect {
     output:
 
     queue params.gpuPartition
-    clusterOptions '--exclusive'
+    clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
     script:
     """
