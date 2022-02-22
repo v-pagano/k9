@@ -116,13 +116,21 @@ include { VARIANTCALLERS_NORMAL; VARIANTCALLERS_TUMOR } from './workflows/varian
 include { ANNOTATION_NORMAL; ANNOTATION_TUMOR } from './workflows/annotation'
 include { PB_HAPLOTYPECALLER; PB_DEEPVARIANT; PB_SOMATIC } from './workflows/parabricks'
 include { PUBLISH_RESULTS } from './workflows/helpers'
-include { pb_germline } from './process/parabricks'
+include { pb_germline; pb_haplotypecaller; pb_deepvariant; pb_fq2bam } from './process/parabricks'
 
 workflow {
 
     if (params.fastq) {
-        fastqs = Channel.fromFilePairs(params.input + '/*_{1,2}.fastq.gz')
-        pb_germline(fastqs)
+        fastqs = Channel.fromFilePairs(params.input)
+        if (params.mapping_type == 'parabricks' && params.pb_haplotypecaller) {
+            bam = pb_germline(fastqs)
+            bam = pb_germline.out[0]
+        } else {
+            bam = pb_fq2bam(fastqs)
+            bam = pb_fq2bam.out[0]
+            pb_haplotypecaller(bam)
+        }
+        pb_deepvariant(bam)
     } else {
 
         inputType = typeOfInput(params.input)

@@ -1,21 +1,24 @@
 process pb_fq2bam {
     input:
-        val fq
-        val sampleName
+        each fq
 
     output:
-        file "${sampleName}*"
+        file "${fq[0]}.bam"
+        file "${fq[0]}*"
 
     queue params.gpuPartition
     clusterOptions '--exclusive'
+
+    when:
+        params.mapping_type == 'parabricks'
 
     script:
     """
         source /etc/profile.d/modules.sh
         module load parabricks/${params.pb_ver} 
         pbrun fq2bam --bwa-options '-K 100000000 -Y' --ref ${params.pb_reference} \
-        ${fq} \
-        --out-bam '${sampleName}.bam' \
+        --in-fq ${fq[1][0]} ${fq[1][1]} \
+        --out-bam '${fq[0]}.bam' \
         ${params.baserecalibration ? '--knownSites ' + params.knownSites + ' --out-recal-file ' + sampleName + '_recal.txt ' : ''} --tmp-dir /scratch/vpagano/tmp
     """
 
@@ -50,9 +53,8 @@ process pb_rna_fq2bam {
 process pb_deepvariant {
     input:
         file bam
-        val sampleName
     output:
-        file "${sampleName}*"
+        file "${bam.baseName}*"
 
     queue params.gpuPartition
     clusterOptions '--exclusive'
@@ -65,8 +67,8 @@ process pb_deepvariant {
         source /etc/profile.d/modules.sh
         module load parabricks/${params.pb_ver} 
         pbrun deepvariant --ref ${params.pb_reference} \
-        --in-bam '${sampleName}.bam' \
-        --out-variants '${sampleName}_pb_deepvariant.vcf' \
+        --in-bam '${bam}' \
+        --out-variants '${bam.baseName}_pb_deepvariant.vcf' \
         --tmp-dir /scratch/vpagano/tmp
     """
 
@@ -74,21 +76,23 @@ process pb_deepvariant {
 
 process pb_haplotypecaller {
     input:
-        file bam
-        val sampleName
+        each bam
     output:
-        file "${sampleName}*"
+        file "${bam.baseName}*"
 
     queue params.gpuPartition
     clusterOptions '--exclusive'
+
+    when:
+        params.pb_haplotypecaller
 
     script:
     """
         source /etc/profile.d/modules.sh
         module load parabricks/${params.pb_ver} 
         pbrun haplotypecaller --ref ${params.pb_reference} \
-        --in-bam '${sampleName}.bam' \
-        --out-variants '${sampleName}_pb_haplotypecaller.vcf' \
+        --in-bam '${bam}' \
+        --out-variants '${bam.baseName}_pb_haplotypecaller.vcf' \
         --tmp-dir /scratch/vpagano/tmp
     """
 
@@ -98,11 +102,15 @@ process pb_germline {
     input:
         each fq
     output:
+        file "${fq[0]}.bam"
         file "${fq[0]}*"
 
     queue params.gpuPartition
     clusterOptions '--exclusive'
     publishDir '/scratch/vpagano/results/canine', mode: 'copy', overwrite: 'true'
+
+    when:
+        params.mapping_type == 'parabricks' && params.pb_haplotypecaller
 
     script:
     """
