@@ -16,7 +16,11 @@
             "properties": {
                 "input": {
                     "type": "string",
-                    "description": "List of your input files. This can be in either csv, tsv or phoenix json format."
+                    "description": "List of your input files. This can be in either csv, tsv, phoenix json format or a wildcard string for fastqs only."
+                },
+                "fastq": {
+                    "type": "boolean",
+                    "description": "Check this if you are simply passing a directory of fastq files"
                 },
                 "pipeline_type": {
                     "type": "string",
