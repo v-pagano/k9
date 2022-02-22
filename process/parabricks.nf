@@ -13,6 +13,7 @@ process pb_fq2bam {
         params.mapping_type == 'parabricks'
 
     script:
+        println(fq)
     """
         source /etc/profile.d/modules.sh
         module load parabricks/${params.pb_ver} 

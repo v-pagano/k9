@@ -8,11 +8,10 @@ workflow PB_FQ2BAM {
     main:
         infq = []
         infq = fileTuple.collect { ' --in-fq ' + it.fastq1 + ' ' + it.fastq2 + ' "' + it.rg + '" ' }
-
-        pb_fq2bam(infq.join(' '), sampleName)
+        pb_fq2bam([[sampleName, [fileTuple.fastq1[0], fileTuple.fastq2[0]]]])
 
     emit:
-        pb_fq2bam.out
+        pb_fq2bam.out[1]
 }
 
 workflow PB_RNA_FQ2BAM {
@@ -50,9 +49,9 @@ workflow PB_GERMLINE {
         infq = []
         infq = fileTuple.collect { ' --in-fq ' + it.fastq1 + ' ' + it.fastq2 + ' "' + it.rg + '" ' }
 
-        pb_germline(infq.join(' '), sampleName)
+        pb_germline([[sampleName, [fileTuple.fastq1[0], fileTuple.fastq2[0]]]])
     emit:
-        pb_germline.out
+        pb_germline.out[1]
 }
 
 workflow PB_DEEPVARIANT {
