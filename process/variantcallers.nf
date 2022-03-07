@@ -1,11 +1,10 @@
 process haplotypecaller {
     input:
-        file f
-        val sample
+        tuple val(sample), path(bam)
         each interval
 
     output:
-        file "*.g.vcf.gz"
+        file "${sample}.g.vcf.gz"
 
     container params.gatkContainer
 
@@ -29,19 +28,20 @@ process haplotypecaller {
 process vcf_merge {
     input:
         val vcfList
-        val sampleName
+        val sample
 
     output:
-        file "${sampleName}*"
+        file "${sample}*"
 
     container params.gatkContainer
 
     script:
+    vcfList.view()
     """
         gatk MergeVcfs \
         --java-options "-Xmx7G" \
         --INPUT ${vcfList.join(' --INPUT ')} \
-        --OUTPUT "${sampleName}_haplotypecaller.g.vcf.gz"
+        --OUTPUT "${sample}_haplotypecaller.g.vcf.gz"
     """
 }
 

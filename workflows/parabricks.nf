@@ -60,7 +60,7 @@ workflow PB_DEEPVARIANT {
         sampleName
 
     main:
-        pb_deepvariant(bamFile, sampleName)
+        pb_deepvariant(bamFile)
     emit:
         pb_deepvariant.out
 }

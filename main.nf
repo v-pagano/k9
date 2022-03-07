@@ -111,87 +111,132 @@ def readCsvFile(fileName, fileType) {
     return files
 }
 
-include { MAPPING_TUMOR; MAPPING_NORMAL } from './workflows/mapping'
-include { VARIANTCALLERS_NORMAL; VARIANTCALLERS_TUMOR } from './workflows/variantcallers'
+include { MAPPING } from './workflows/mapping'
+include { VARIANTCALLERS } from './workflows/variantcallers'
+include { FQ_PREP } from './workflows/fq_prep'
+include { BAMQC } from './workflows/bamqc'
 include { ANNOTATION_NORMAL; ANNOTATION_TUMOR } from './workflows/annotation'
 include { PB_HAPLOTYPECALLER; PB_DEEPVARIANT; PB_SOMATIC } from './workflows/parabricks'
-include { PUBLISH_RESULTS } from './workflows/helpers'
-include { pb_germline; pb_haplotypecaller; pb_deepvariant; pb_fq2bam } from './process/parabricks'
+include { publishResults } from './process/helpers'
 
 workflow {
 
-    if (params.fastq) {
-        fastqs = Channel.fromFilePairs(params.input)
-        if (params.mapping_type == 'parabricks' && params.pb_haplotypecaller) {
-            bam = pb_germline(fastqs)
-            bam = pb_germline.out[0]
-        } else {
-            bam = pb_fq2bam(fastqs)
-            bam = pb_fq2bam.out[0]
-            pb_haplotypecaller(bam)
-        }
-        pb_deepvariant(bam)
-    } else {
+    // publishFiles = Channel.empty()
+    // bamFiles = Channel.empty()
+    // vcfFiles = Channel.empty()
 
-        inputType = typeOfInput(params.input)
-        switch (inputType) {
-            case 'json':
-                fileList = readJsonFile(params.input).fileList
-                break        
-            case 'csv':
-                fileList = readCsvFile(params.input, 'csv')
-                break
-            case 'tsv':
-                fileList = readCsvFile(params.input, 'tsv')
-                break
-        }
+    if (params.inputType == 'bam') {
 
-        tumorList = fileList.findAll { it.status.toString() == '1' }
-        normalList = fileList.findAll { it.status.toString() == '0' }
-        tumorSample = tumorList.collect { it.sample }.unique()
-        normalSample = normalList.collect { it.sample }.unique()
+        bamFiles = Channel.fromPath(params.input)
+        bams = bamFiles.map { [ it.baseName, it ] }
+        publishFiles = Channel.empty()
 
-        publishList = Channel.empty()
+        BAMQC(bams)
+        publishFiles = publishFiles.mix(BAMQC.out)
 
-        switch (params.pipeline_type) {
-            case 'Alignment':
-                if (tumorList.size() > 0) {
-                    MAPPING_TUMOR(tumorList)
-                    publishList = publishList.concat(MAPPING_TUMOR.out)
-                }
-                if (normalList.size() > 0) {
-                    MAPPING_NORMAL(normalList)
-                    publishList = publishList.concat(MAPPING_NORMAL.out)
-                }
-                break
-            case 'Constitutional':
-                if (tumorList.size() > 0) {
-                    MAPPING_TUMOR(tumorList)
-                    VARIANTCALLERS_TUMOR(MAPPING_TUMOR.out, tumorSample[0])
-                    ANNOTATION_TUMOR(VARIANTCALLERS_TUMOR.out, tumorSample[0])
-                    publishList = publishList.concat(MAPPING_TUMOR.out)
-                    publishList = publishList.concat(VARIANTCALLERS_TUMOR.out)
-                    publishList = publishList.concat(ANNOTATION_TUMOR.out)
-                }
-                if (normalList.size() > 0) {
-                    MAPPING_NORMAL(normalList)
-                    VARIANTCALLERS_NORMAL(MAPPING_NORMAL.out, normalSample[0])
-                    ANNOTATION_NORMAL(VARIANTCALLERS_NORMAL.out, normalSample[0])
-                    publishList = publishList.concat(MAPPING_NORMAL.out)
-                    publishList = publishList.concat(VARIANTCALLERS_NORMAL.out)
-                    publishList = publishList.concat(ANNOTATION_NORMAL.out)
-                }
-                break
-            case 'Somatic':
-                if (params.accelerated) {
-                    PB_SOMATIC(normalList, normalSample[0], tumorList, tumorSample[0])
-                    publishList = publishList.concat(PB_SOMATIC.out)
-                }
-                break
+        VARIANTCALLERS(bams)
+        publishFiles = publishFiles.mix(VARIANTCALLERS.out[1])
 
-        }
+        publishFiles.view()
 
-        //Publish all of the files to the final output directory
-        PUBLISH_RESULTS(publishList.flatten())
+        publishResults(publishFiles.flatten())
+
     }
+
+    if (params.inputType == 'fastq') {
+
+        fastq = Channel.fromFilePairs(params.input)
+
+        publishFiles = Channel.empty()
+
+        FQ_PREP(fastq)
+        publishFiles = publishFiles.mix(FQ_PREP.out)
+
+        MAPPING(fastq)
+        publishFiles = publishFiles.mix(MAPPING.out[1])
+
+        BAMQC(bams)
+        publishFiles = publishFiles.mix(BAMQC.out)
+
+        VARIANTCALLERS(MAPPING.out[0])
+        publishFiles = publishFiles.mix(VARIANTCALLERS.out[1])
+
+        publishResults(publishFiles.flatten())
+
+    }
+
+    // if (params.fastq) {
+    //     fastqs = Channel.fromFilePairs(params.input)
+    //     if (params.mapping_type == 'parabricks' && params.pb_haplotypecaller) {
+    //         bam = pb_germline(fastqs)
+    //         bam = pb_germline.out[0]
+    //     } else {
+    //         bam = pb_fq2bam(fastqs)
+    //         bam = pb_fq2bam.out[0]
+    //         pb_haplotypecaller(bam)
+    //     }
+    //     pb_deepvariant(bam)
+    // } else {
+
+    //     inputType = typeOfInput(params.input)
+    //     switch (inputType) {
+    //         case 'json':
+    //             fileList = readJsonFile(params.input).fileList
+    //             break        
+    //         case 'csv':
+    //             fileList = readCsvFile(params.input, 'csv')
+    //             break
+    //         case 'tsv':
+    //             fileList = readCsvFile(params.input, 'tsv')
+    //             break
+    //     }
+
+    //     tumorList = fileList.findAll { it.status.toString() == '1' }
+    //     normalList = fileList.findAll { it.status.toString() == '0' }
+    //     tumorSample = tumorList.collect { it.sample }.unique()
+    //     normalSample = normalList.collect { it.sample }.unique()
+
+    //     publishList = Channel.empty()
+
+    //     switch (params.pipeline_type) {
+    //         case 'Alignment':
+    //             if (tumorList.size() > 0) {
+    //                 MAPPING_TUMOR(tumorList)
+    //                 publishList = publishList.concat(MAPPING_TUMOR.out)
+    //             }
+    //             if (normalList.size() > 0) {
+    //                 MAPPING_NORMAL(normalList)
+    //                 publishList = publishList.concat(MAPPING_NORMAL.out)
+    //             }
+    //             break
+    //         case 'Constitutional':
+    //             if (tumorList.size() > 0) {
+    //                 MAPPING_TUMOR(tumorList)
+    //                 VARIANTCALLERS_TUMOR(MAPPING_TUMOR.out, tumorSample[0])
+    //                 ANNOTATION_TUMOR(VARIANTCALLERS_TUMOR.out, tumorSample[0])
+    //                 publishList = publishList.concat(MAPPING_TUMOR.out)
+    //                 publishList = publishList.concat(VARIANTCALLERS_TUMOR.out)
+    //                 publishList = publishList.concat(ANNOTATION_TUMOR.out)
+    //             }
+    //             if (normalList.size() > 0) {
+    //                 MAPPING_NORMAL(normalList)
+    //                 VARIANTCALLERS_NORMAL(MAPPING_NORMAL.out, normalSample[0])
+    //                 ANNOTATION_NORMAL(VARIANTCALLERS_NORMAL.out, normalSample[0])
+    //                 publishList = publishList.concat(MAPPING_NORMAL.out)
+    //                 publishList = publishList.concat(VARIANTCALLERS_NORMAL.out)
+    //                 publishList = publishList.concat(ANNOTATION_NORMAL.out)
+    //             }
+    //             break
+    //         case 'Somatic':
+    //             if (params.accelerated) {
+    //                 PB_SOMATIC(normalList, normalSample[0], tumorList, tumorSample[0])
+    //                 publishList = publishList.concat(PB_SOMATIC.out)
+    //             }
+    //             break
+
+    //     }
+
+    //     //Publish all of the files to the final output directory
+    //     PUBLISH_RESULTS(publishList.flatten())
+    // }
 }

@@ -1,59 +1,44 @@
 import org.yaml.snakeyaml.Yaml
 
-include { PB_HAPLOTYPECALLER; PB_DEEPVARIANT } from './parabricks'
+include { pb_haplotypecaller; pb_deepvariant } from '../process/parabricks'
 include { haplotypecaller; vcf_merge; make_examples; call_variants; post_process_calls; filter_variants } from '../process/variantcallers'
 include { ANNOTATION_NORMAL; ANNOTATION_TUMOR } from './annotation'
 
-workflow VARIANTCALLERS_TUMOR {
+workflow VARIANTCALLERS {
     take:
-        bamFile
-        sampleName
+        bam
 
     main:
-        VARIANTCALLERS_NORMAL(bamFile, sampleName)
-        ANNOTATION_TUMOR(VARIANTCALLERS_NORMAL.out, sampleName)
+
+        vcfFiles = Channel.empty()
+        publishFiles = Channel.empty()
+
+        pb_haplotypecaller(bam, params.pb_reference)
+        publishFiles = publishFiles.mix(pb_haplotypecaller.out[1].flatten())
+        vcfFiles = vcfFiles.mix(pb_haplotypecaller.out[0])
+        
+        pb_deepvariant(bam, params.pb_reference)
+        publishFiles = publishFiles.mix(pb_deepvariant.out[1].flatten())
+        vcfFiles = vcfFiles.mix(pb_deepvariant.out[0])
+
+        // if (params.haplotypecaller) {
+        //     HAPLOTYPECALLER(bam)
+        //     publishFiles = publishFiles.mix(HAPLOTYPECALLER.out.flatten())
+        //     vcfFiles = vcfFiles.mix(HAPLOTYPECALLER.out)
+        // }
 
     emit:
-        VARIANTCALLERS_NORMAL.out
-}
-
-workflow VARIANTCALLERS_NORMAL {
-    take:
-        bamFile
-        sampleName
-
-    main:
-        vcfs = bamFile.flatten().filter{ it ==~ /.*vcf/ || it ==~ /.*vcf.gz/ }
-        bams = bamFile.flatten().filter{ it ==~ /.*\.bam/ }
-        // Handle accelerated parabricks germline
-        if (!(params.accelerated || params.mapping_type == 'parabricks')) {
-            if (params.pb_haplotypecaller) {
-                PB_HAPLOTYPECALLER(bams, sampleName)
-                vcfs = vcfs.concat(PB_HAPLOTYPECALLER.out.flatten().filter{ it ==~ /.*vcf/ || it ==~ /.*vcf.gz/ })
-            }
-        }
-        PB_DEEPVARIANT(bams, sampleName)
-        DEEPVARIANT(bams, sampleName, bamFile)
-        vcfs = vcfs.concat(PB_DEEPVARIANT.out.flatten().filter{ it ==~ /.*vcf/ || it ==~ /.*vcf.gz/ })
-        vcfs = vcfs.concat(DEEPVARIANT.out.flatten().filter{ it ==~ /.*vcf/ || it ==~ /.*vcf.gz/ })
-        //Need this here because of the integrated germline pipeline for parabricks
-        if (params.haplotypecaller) {
-            HAPLOTYPECALLER(bams, sampleName)
-            vcfs = vcfs.concat(HAPLOTYPECALLER.out.flatten().filter{ it ==~ /.*vcf/ || it ==~ /.*vcf.gz/ })
-        }
-
-        ANNOTATION_NORMAL(vcfs, sampleName)
-
-    emit:
-        vcfs
+        vcfFiles
+        publishFiles
 }
 
 workflow HAPLOTYPECALLER {
     take: 
-        bamFile
-        sampleName
+        bam
 
     main:
+
+        bam.view()
         Yaml parser = new Yaml()
         intervals = parser.load((params.HaplotypecallerIntervalsYaml as File).text)
 
@@ -62,11 +47,10 @@ workflow HAPLOTYPECALLER {
             arrInt = interval.collect { ' -L "' + it.contig + ':' + it.start + '-' + it.stop + '" '}
         }
         
-        haplotypecaller(bamFile, sampleName, arrInt)
-        vcf_merge(haplotypecaller.out.collect(), sampleName)
+        output = haplotypecaller(bam, arrInt) | vcf_merge
 
     emit:
-        vcf_merge.out
+        output
 }
 
 workflow DEEPVARIANT {
