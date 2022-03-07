@@ -115,7 +115,7 @@ include { MAPPING } from './workflows/mapping'
 include { VARIANTCALLERS } from './workflows/variantcallers'
 include { FQ_PREP } from './workflows/fq_prep'
 include { BAMQC } from './workflows/bamqc'
-include { ANNOTATION_NORMAL; ANNOTATION_TUMOR } from './workflows/annotation'
+include { ANNOTATION } from './workflows/annotation'
 include { PB_HAPLOTYPECALLER; PB_DEEPVARIANT; PB_SOMATIC } from './workflows/parabricks'
 include { publishResults } from './process/helpers'
 
@@ -124,6 +124,19 @@ workflow {
     // publishFiles = Channel.empty()
     // bamFiles = Channel.empty()
     // vcfFiles = Channel.empty()
+
+    if (params.inputType == 'vcf') {
+
+        vcfFiles = Channel.fromPath(params.input)
+        vcfs = vcfFiles.map { [ it.baseName, it ] }
+        publishFiles = Channel.empty()
+    
+        ANNOTATION(vcfs)
+        publishFiles = publishFiles.mix(ANNOTATION.out)
+
+        publishResults(publishFiles.flatten())
+
+    }
 
     if (params.inputType == 'bam') {
 
@@ -137,7 +150,8 @@ workflow {
         VARIANTCALLERS(bams)
         publishFiles = publishFiles.mix(VARIANTCALLERS.out[1])
 
-        publishFiles.view()
+        ANNOTATION(VARIANTCALLERS.out[0])
+        publishFiles = publishFiles.mix(ANNOTATION.out)
 
         publishResults(publishFiles.flatten())
 
@@ -155,11 +169,14 @@ workflow {
         MAPPING(fastq)
         publishFiles = publishFiles.mix(MAPPING.out[1])
 
-        BAMQC(bams)
+        BAMQC(MAPPING.out[0])
         publishFiles = publishFiles.mix(BAMQC.out)
 
         VARIANTCALLERS(MAPPING.out[0])
         publishFiles = publishFiles.mix(VARIANTCALLERS.out[1])
+
+        ANNOTATION(VARIANTCALLERS.out[0])
+        publishFiles = publishFiles.mix(ANNOTATION.out)
 
         publishResults(publishFiles.flatten())
 

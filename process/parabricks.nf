@@ -200,6 +200,9 @@ process pb_collectmetrics {
     queue params.gpuPartition
     clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
+    when:
+        params.pb_collectmetrics
+
     script:
     """
         source /etc/profile.d/modules.sh

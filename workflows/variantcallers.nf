@@ -2,7 +2,6 @@ import org.yaml.snakeyaml.Yaml
 
 include { pb_haplotypecaller; pb_deepvariant } from '../process/parabricks'
 include { haplotypecaller; vcf_merge; make_examples; call_variants; post_process_calls; filter_variants } from '../process/variantcallers'
-include { ANNOTATION_NORMAL; ANNOTATION_TUMOR } from './annotation'
 
 workflow VARIANTCALLERS {
     take:

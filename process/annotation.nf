@@ -1,11 +1,11 @@
 process vep {
 
     input:
-        each vcfFile
-        val sampleName
+        tuple val(sample), path(vcf)
+        path reference
 
     output:
-        file "${sampleName}*"
+        file "${sample}*"
 
     cpus params.vepCpus
     container params.vepContainer
@@ -17,9 +17,9 @@ process vep {
     //Split up these processes when containers are ready
     """
         vep --fork 4 \
-        --input_file "${vcfFile}" \
+        --input_file "${vcf}" \
         --format vcf \
-        --output_file "${sampleName}_vep.vcf" \
+        --output_file "${sample}_vep.vcf" \
         --vcf \
         --vcf_info_field CSQ \
         --species homo_sapiens \
@@ -29,7 +29,7 @@ process vep {
         --dir_cache "${params.vepData}" \
         --cache_version 98 \
         --offline \
-        --fasta "${params.reference}" \
+        --fasta "${reference}" \
         --buffer_size 10000 \
         --terms SO \
         --hgvs \
@@ -47,23 +47,22 @@ process vep {
         bcftools view \
         --threads 4 \
         --output-type z \
-        --output-file "${sampleName}_vep.vcf.gz" \
-        "${sampleName}_vep.vcf"
+        --output-file "${sample}_vep.vcf.gz" \
+        "${sample}_vep.vcf"
 
-        rm "${sampleName}_vep.vcf"
+        rm "${sample}_vep.vcf"
 
-        bcftools index --threads 4 --force --tbi "${sampleName}_vep.vcf.gz"
+        bcftools index --threads 4 --force --tbi "${sample}_vep.vcf.gz"
     """
 }
 
 process snpeff {
 
     input:
-        each vcfFile
-        val sampleName
+        tuple val(sample), path(vcf)
 
     output:
-        file "${sampleName}*"
+        file "${sample}*"
 
     cpus params.snpeffCpus
     container params.snpeffContainer
@@ -82,10 +81,10 @@ process snpeff {
             -hgvs \
             -lof \
             "${params.snpeffDb}" \
-            "${vcfFile}" \
-            | bcftools view --output-type z --output-file "${sampleName}_snpeff.vcf.gz"
+            "${vcf}" \
+            | bcftools view --output-type z --output-file "${sample}_snpeff.vcf.gz"
 
-        bcftools index --threads 4 --tbi --force "${sampleName}_snpeff.vcf.gz"
+        bcftools index --threads 4 --tbi --force "${sample}_snpeff.vcf.gz"
 
     """
 }

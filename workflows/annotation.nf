@@ -1,27 +1,20 @@
 include { vep; snpeff } from '../process/annotation'
 
-workflow ANNOTATION_TUMOR {
+workflow ANNOTATION {
     take:
-        vcfFile
-        sampleName
-
+        vcf
+        
     main:
-        ANNOTATION_NORMAL(vcfFile, sampleName)
+
+        publishFiles = Channel.empty()
+
+        vep(vcf, params.reference)
+        publishFiles = publishFiles.mix(vep.out)
+
+        snpeff(vcf)
+        publishFiles = publishFiles.mix(snpeff.out)
 
     emit:
-        ANNOTATION_NORMAL.out
-}
-
-workflow ANNOTATION_NORMAL {
-    take:
-        vcfFile
-        sampleName
-
-    main:
-        vep(vcfFile, sampleName)
-        snpeff(vcfFile, sampleName)
-
-    emit:
-        vep.out.concat(snpeff.out)
+        publishFiles
 }
 
