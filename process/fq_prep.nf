@@ -9,10 +9,11 @@ process fastqc {
         path "*.html"
         path "*.zip"
  
+    cpus params.fastqcCPUs
+
     when:
         params.fastqc
 
-    cpus params.fastqcCPUs
 
     script:
     """
