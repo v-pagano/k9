@@ -29,6 +29,17 @@
                 }
             }
         },
+        "mapping": {
+            "title": "Mapping",
+            "type": "object",
+            "properties": {
+                "parabricks": {
+                    "type": "boolean",
+                    "description": "Would you like to align with parabricks?",
+                    "default": true
+                }
+            }
+        },
         "variantcallers": {
             "title": "Variant Callers",
             "type": "object",
@@ -88,6 +99,9 @@
     "allOf": [
         {
             "$ref": "#/definitions/general"
+        },
+        {
+            "$ref": "#/definitions/mapping"
         },
         {
             "$ref": "#/definitions/variantcallers"
