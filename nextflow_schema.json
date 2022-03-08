@@ -35,7 +35,7 @@
             "properties": {
                 "parabricks": {
                     "type": "boolean",
-                    "description": "Would you like to align with parabricks?",
+                    "description": "Would you like to align with parabricks (GPU accelerated)?",
                     "default": true
                 }
             }
@@ -43,6 +43,11 @@
         "variantcallers": {
             "title": "Variant Callers",
             "type": "object",
+            "gvcf": {
+                "type": "boolean",
+                "description": "Would you like to create gvcfs?",
+                "default": true
+            },
             "properties": {
                 "pb_haplotypecaller": {
                     "type": "boolean",
