@@ -43,12 +43,12 @@
         "variantcallers": {
             "title": "Variant Callers",
             "type": "object",
-            "gvcf": {
-                "type": "boolean",
-                "description": "Would you like to create gvcfs?",
-                "default": true
-            },
             "properties": {
+                "gvcf": {
+                    "type": "boolean",
+                    "description": "Would you like to create gvcfs?",
+                    "default": true
+                },
                 "pb_haplotypecaller": {
                     "type": "boolean",
                     "description": "Parabricks GPU-accelerated haplotype caller",
