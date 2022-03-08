@@ -79,6 +79,11 @@
                     "description": "Would you like to run fastqc?",
                     "default": false
                 },
+                "pb_collectmetrics": {
+                    "type": "boolean",
+                    "description": "Would you like to run QC on your bams?",
+                    "default": false
+                },
                 "publishResults": {
                     "type": "boolean",
                     "description": "Would you like your output files (BAM, VCF, etc.) copied to a separate folder?",
