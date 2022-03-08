@@ -17,7 +17,7 @@
                     "type": "string",
                     "description": "Wildcard for all of your fastqs, bams or vcfs. Note paired fastqs must have a {1,2} wildcard eg. GIAB_{1,2}.fastq.gz"
                 },
-                "input_type": {
+                "inputType": {
                     "type": "string",
                     "description": "Are you starting with fastqs, bams or vcfs",
                     "default": "fastq",
