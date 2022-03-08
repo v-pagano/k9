@@ -10,26 +10,21 @@
             "type": "object",
             "required": [
                 "input",
-                "pipeline_type",
-                "mapping_type"
+                "input_type"
             ],
             "properties": {
                 "input": {
                     "type": "string",
-                    "description": "List of your input files. This can be in either csv, tsv, phoenix json format or a wildcard string for fastqs only."
+                    "description": "Wildcard for all of your fastqs, bams or vcfs. Note paired fastqs must have a {1,2} wildcard eg. GIAB_{1,2}.fastq.gz"
                 },
-                "fastq": {
-                    "type": "boolean",
-                    "description": "Check this if you are simply passing a directory of fastq files"
-                },
-                "pipeline_type": {
+                "input_type": {
                     "type": "string",
-                    "description": "Which Pipeline are you running?",
-                    "default": "Alignment",
+                    "description": "Are you starting with fastqs, bams or vcfs",
+                    "default": "fastq",
                     "enum": [
-                        "Alignment",
-                        "Constitutional",
-                        "Somatic"
+                        "fastq",
+                        "bam",
+                        "vcf"
                     ]
                 }
             }
@@ -38,14 +33,6 @@
             "title": "Variant Callers",
             "type": "object",
             "properties": {
-                "haplotypecaller": {
-                    "type": "boolean",
-                    "default": false
-                },
-                "deepvariant": {
-                    "type": "boolean",
-                    "default": false
-                },
                 "pb_haplotypecaller": {
                     "type": "boolean",
                     "description": "Parabricks GPU-accelerated haplotype caller",
@@ -85,30 +72,10 @@
                     "type": "string",
                     "description": "If you selected publishResults, where would you like them copied?"
                 },
-                "accelerated": {
-                    "type": "boolean",
-                    "description": "Would you like your pipeline to run faster?",
-                    "default": true
-                },
-                "reference": {
-                    "type": "string",
-                    "description": "Reference for BWA and BWA2?",
-                    "hidden": true
-                },
                 "pb_reference": {
                     "type": "string",
                     "description": "Reference for Parabricks?",
                     "hidden": true
-                },
-                "mapping_type": {
-                    "type": "string",
-                    "description": "Which mapper would you like to use?",
-                    "default": "parabricks",
-                    "enum": [
-                        "parabricks",
-                        "bwa",
-                        "bwa2"
-                    ]
                 }
             }
         }
