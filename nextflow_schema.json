@@ -63,6 +63,11 @@
             "title": "Optional settings",
             "type": "object",
             "properties": {
+                "fastqc": {
+                    "type": "boolean",
+                    "description": "Would you like to run fastqc?",
+                    "default": false
+                },
                 "publishResults": {
                     "type": "boolean",
                     "description": "Would you like your output files (BAM, VCF, etc.) copied to a separate folder?",
