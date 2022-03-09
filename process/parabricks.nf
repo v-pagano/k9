@@ -91,8 +91,10 @@ process pb_haplotypecaller {
     queue params.gpuPartition
     clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
+    //This boolean is complicated because we only want to run haplotypecaller if we are not aligning fastqs as well
+    //Otherwise pb_germline is faster
     when:
-        params.pb_haplotypecaller
+        (params.pb_haplotypecaller && !params.parabricks && params.inputType == 'fastq') || (!params.inputType == 'fastq' && params.pb_haplotypecaller)
 
     script:
     """
