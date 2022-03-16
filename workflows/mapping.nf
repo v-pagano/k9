@@ -19,7 +19,17 @@ workflow MAPPING {
         publishFiles = publishFiles.mix(pb_germline.out[1].flatten())
         bamFiles = bamFiles.mix(pb_germline.out[0])
         vcfFiles = vcfFiles.mix(pb_germline.out[2])
+
+        if (params.bwa) {
+            BWA(fastq)
+            publishFiles = publishFiles.mix(BWA.out.flatten())
+        }
                 
+        if (params.bwa2) {
+            BWA2(fastq)
+            publishFiles = publishFiles.mix(BWA2.out.flatten())
+        }
+        
         // pb_haplotypecaller(pb_fq2bam.out[0], params.pb_reference)
         // publishFiles = publishFiles.mix(pb_haplotypecaller.out[1].flatten())
         // vcfFiles = vcfFiles.mix(pb_haplotypecaller.out[0])

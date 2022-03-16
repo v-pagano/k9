@@ -13,10 +13,10 @@ workflow SAM_SORT {
 workflow SAM_MERGE {
     take: 
         fileList
-        sampleName
+        fastq
 
     main:
-        sam_merge(fileList.toList(), sampleName)
+        sam_merge(fileList.toList(), fastq)
 
     emit:
         sam_merge.out

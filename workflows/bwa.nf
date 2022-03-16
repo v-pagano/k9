@@ -3,13 +3,12 @@ include { SAM_SORT; SAM_MERGE; SAM_INDEX } from './sam'
 
 workflow BWA {
     take: 
-        fileTuple
-        sampleName
+        fastq
 
     main:
-        tempFiles = bwa_mem(fileTuple)
+        tempFiles = bwa_mem(fastq)
         unMergedFiles = SAM_SORT(tempFiles)
-        mergedFile = SAM_MERGE(unMergedFiles, sampleName)
+        mergedFile = SAM_MERGE(unMergedFiles, fastq)
 
     emit:
         mergedFile
@@ -17,13 +16,12 @@ workflow BWA {
 
 workflow BWA2 {
     take: 
-        fileTuple
-        sampleName
+        fastq
 
     main:
-        tempFiles = bwa_mem2(fileTuple)
+        tempFiles = bwa_mem2(fastq)
         unMergedFiles = SAM_SORT(tempFiles)
-        mergedFile = SAM_MERGE(unMergedFiles, sampleName)
+        mergedFile = SAM_MERGE(unMergedFiles, fastq)
 
     emit:
         mergedFile

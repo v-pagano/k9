@@ -18,17 +18,17 @@ process sam_sort {
 process sam_merge {
     input:
         val f
-        val sampleName
+        tuple val(sample), path(fq)
 
     output:
-        file "${sampleName}*"
+        file "${sample}*"
 
     cpus params.samtoolsCpus
     container params.samtoolsContainer
 
     script:
     """
-        samtools merge --threads ${params.samtoolsCpus} -c -f -l 6 '${sampleName}.bam' ${f.join(' ')}
-        samtools index '${sampleName}.bam'
+        samtools merge --threads ${params.samtoolsCpus} -c -f -l 6 '${sample}.bam' ${f.join(' ')}
+        samtools index '${sample}.bam'
     """
 }
