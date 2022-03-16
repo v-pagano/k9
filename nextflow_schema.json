@@ -38,6 +38,16 @@
                     "description": "Would you like to align with parabricks (GPU accelerated)?",
                     "default": true
                 }
+            },
+            "bwa": {
+                "type": "boolean",
+                "description": "Would you like to align with bwa mem",
+                "default": true
+            },
+            "bwa2": {
+                "type": "boolean",
+                "description": "Would you like to align with bwamem2",
+                "default": true
             }
         },
         "variantcallers": {
