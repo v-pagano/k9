@@ -22,22 +22,16 @@ workflow MAPPING {
 
         if (params.bwa) {
             BWA(fastq)
-            publishFiles = publishFiles.mix(BWA.out.flatten())
+            publishFiles = publishFiles.mix(BWA.out.publishFiles.flatten())
+            bamFiles = bamFiles.mix(BWA.out.bam)
         }
                 
         if (params.bwa2) {
             BWA2(fastq)
-            publishFiles = publishFiles.mix(BWA2.out.flatten())
+            publishFiles = publishFiles.mix(BWA2.out[1].flatten())
+            bamFiles = bamFiles.mix(BWA2.out[0])
         }
         
-        // pb_haplotypecaller(pb_fq2bam.out[0], params.pb_reference)
-        // publishFiles = publishFiles.mix(pb_haplotypecaller.out[1].flatten())
-        // vcfFiles = vcfFiles.mix(pb_haplotypecaller.out[0])
-        
-        // pb_deepvariant(pb_fq2bam.out[0], params.pb_reference)
-        // publishFiles = publishFiles.mix(pb_deepvariant.out[1].flatten())
-        // vcfFiles = vcfFiles.mix(pb_deepvariant.out[0])
-
     emit:
         bamFiles
         publishFiles

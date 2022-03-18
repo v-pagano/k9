@@ -57,8 +57,9 @@ process pb_deepvariant {
         path reference
 
     output:
-        tuple val("${sample}"), path("${sample}*.vcf")
+        tuple val("${sample}"), path("${sample}*deepvariant.vcf")
         file "${sample}*"
+        tuple val("${sample}"), path("${sample}*.g.vcf")
 
     queue params.gpuPartition
     clusterOptions "--exclusive ${params.gpuClusterOptions}"
@@ -85,8 +86,9 @@ process pb_haplotypecaller {
         path reference
 
     output:
-        tuple val("${sample}"), path("${sample}*.vcf")
+        tuple val("${sample}"), path("${sample}*caller.vcf")
         file "${sample}*"
+        tuple val("${sample}"), path("${sample}*.g.vcf")
 
     queue params.gpuPartition
     clusterOptions "--exclusive ${params.gpuClusterOptions}"
@@ -193,11 +195,11 @@ process mutect {
 process pb_collectmetrics {
 
     input:
-        val bam
+        tuple val(sample), path(bam)
         path reference
 
     output:
-        file "${bam[0]}-qc/"
+        file "${sample}-qc/"
 
     queue params.gpuPartition
     clusterOptions "--exclusive ${params.gpuClusterOptions}"
@@ -210,8 +212,8 @@ process pb_collectmetrics {
         source /etc/profile.d/modules.sh
         module load parabricks/${params.pb_ver} 
         pbrun collectmultiplemetrics --ref ${reference} \
-        --bam ${bam[1]} \
-        --out-qc-metrics-dir '${bam[0]}-qc' \
+        --bam ${bam} \
+        --out-qc-metrics-dir '${sample}-qc' \
         --gen-all-metrics \
         --tmp-dir /scratch/vpagano/tmp
 

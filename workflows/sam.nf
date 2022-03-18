@@ -19,7 +19,8 @@ workflow SAM_MERGE {
         sam_merge(fileList.toList(), fastq)
 
     emit:
-        sam_merge.out
+        bam = sam_merge.out.bam
+        publishFiles = sam_merge.out.publishFiles
 }
 
 workflow SAM_INDEX {

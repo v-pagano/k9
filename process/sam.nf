@@ -21,7 +21,8 @@ process sam_merge {
         tuple val(sample), path(fq)
 
     output:
-        file "${sample}*"
+        tuple val(sample), path("${sample}.bam"), emit: bam
+        path "${sample}*", emit: publishFiles
 
     cpus params.samtoolsCpus
     container params.samtoolsContainer

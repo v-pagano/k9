@@ -37,7 +37,6 @@ workflow HAPLOTYPECALLER {
 
     main:
 
-        bam.view()
         Yaml parser = new Yaml()
         intervals = parser.load((params.HaplotypecallerIntervalsYaml as File).text)
 

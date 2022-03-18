@@ -36,7 +36,6 @@ process vcf_merge {
     container params.gatkContainer
 
     script:
-    vcfList.view()
     """
         gatk MergeVcfs \
         --java-options "-Xmx7G" \

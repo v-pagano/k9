@@ -6,6 +6,7 @@ include { FQ_PREP } from './workflows/fq_prep'
 include { BAMQC } from './workflows/bamqc'
 include { ANNOTATION } from './workflows/annotation'
 include { PB_HAPLOTYPECALLER; PB_DEEPVARIANT; PB_SOMATIC } from './workflows/parabricks'
+include { BAM2PGBAM } from './workflows/petagene'
 include { publishResults } from './process/helpers'
 
 workflow {
@@ -40,6 +41,9 @@ workflow {
         ANNOTATION(VARIANTCALLERS.out[0])
         publishFiles = publishFiles.mix(ANNOTATION.out)
 
+        BAM2PGBAM(bamFiles)
+        publishFiles = publishFiles.mix(BAM2PGBAM.out)
+
         publishResults(publishFiles.flatten())
 
     }
@@ -62,6 +66,9 @@ workflow {
 
         ANNOTATION(VARIANTCALLERS.out[0])
         publishFiles = publishFiles.mix(ANNOTATION.out)
+
+        BAM2PGBAM(MAPPING.out[0])
+        publishFiles = publishFiles.mix(BAM2PGBAM.out)
 
         publishResults(publishFiles.flatten())
 
