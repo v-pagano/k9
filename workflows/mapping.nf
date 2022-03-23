@@ -33,7 +33,7 @@ workflow MAPPING {
         }
         
     emit:
-        bamFiles
-        publishFiles
-        vcfFiles
+        bam = bamFiles
+        publishFiles = publishFiles
+        vcf = vcfFiles
 }

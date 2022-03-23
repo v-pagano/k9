@@ -56,18 +56,18 @@ workflow {
         publishFiles = publishFiles.mix(FQ_PREP.out)
 
         MAPPING(fastq)
-        publishFiles = publishFiles.mix(MAPPING.out[1])
+        publishFiles = publishFiles.mix(MAPPING.out.publishFiles)
 
-        BAMQC(MAPPING.out[0])
+        BAMQC(MAPPING.out.bam)
         publishFiles = publishFiles.mix(BAMQC.out)
 
-        VARIANTCALLERS(MAPPING.out[0])
+        VARIANTCALLERS(MAPPING.out.bam)
         publishFiles = publishFiles.mix(VARIANTCALLERS.out[1])
 
         ANNOTATION(VARIANTCALLERS.out[0])
         publishFiles = publishFiles.mix(ANNOTATION.out)
 
-        BAM2PGBAM(MAPPING.out[0])
+        BAM2PGBAM(MAPPING.out.bam)
         publishFiles = publishFiles.mix(BAM2PGBAM.out)
 
         publishResults(publishFiles.flatten())

@@ -1,6 +1,6 @@
 process sam_sort {
     input:
-        each f
+        path f
     output:
         file 'temp.bam'
 
@@ -19,9 +19,10 @@ process sam_merge {
     input:
         val f
         tuple val(sample), path(fq)
+        val suffix
 
     output:
-        tuple val(sample), path("${sample}.bam"), emit: bam
+        tuple val(sample), path("${sample}_${suffix}.bam"), emit: bam
         path "${sample}*", emit: publishFiles
 
     cpus params.samtoolsCpus
@@ -29,7 +30,7 @@ process sam_merge {
 
     script:
     """
-        samtools merge --threads ${params.samtoolsCpus} -c -f -l 6 '${sample}.bam' ${f.join(' ')}
-        samtools index '${sample}.bam'
+        samtools merge --threads ${params.samtoolsCpus} -c -f -l 6 '${sample}_${suffix}.bam' ${f.join(' ')}
+        samtools index '${sample}_${suffix}.bam'
     """
 }

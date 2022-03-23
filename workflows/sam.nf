@@ -14,9 +14,10 @@ workflow SAM_MERGE {
     take: 
         fileList
         fastq
+        suffix
 
     main:
-        sam_merge(fileList.toList(), fastq)
+        sam_merge(fileList.toList(), fastq, suffix)
 
     emit:
         bam = sam_merge.out.bam

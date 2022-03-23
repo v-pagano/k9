@@ -8,7 +8,7 @@ workflow BWA {
     main:
         tempFiles = bwa_mem(fastq)
         unMergedFiles = SAM_SORT(tempFiles)
-        SAM_MERGE(unMergedFiles, fastq)
+        SAM_MERGE(unMergedFiles, fastq, 'bwa')
 
     emit:
         bam = SAM_MERGE.out.bam
@@ -22,9 +22,10 @@ workflow BWA2 {
     main:
         tempFiles = bwa_mem2(fastq)
         unMergedFiles = SAM_SORT(tempFiles)
-        mergedFile = SAM_MERGE(unMergedFiles, fastq)
+        SAM_MERGE(unMergedFiles, fastq, 'bwa2')
 
     emit:
-        mergedFile
+        bam = SAM_MERGE.out.bam
+        publishFiles = SAM_MERGE.out.publishFiles
 
 }

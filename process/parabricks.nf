@@ -4,7 +4,7 @@ process pb_fq2bam {
         path reference
 
     output:
-        tuple val("${sample}"), path("${sample}.bam")
+        tuple val("${sample}"), path("${sample}_pb.bam")
         path("${sample}*")
 
     queue params.gpuPartition
@@ -19,7 +19,7 @@ process pb_fq2bam {
         module load parabricks/${params.pb_ver} 
         pbrun fq2bam --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
-        --out-bam '${sample}.bam' \
+        --out-bam '${sample}_pb.bam' \
         ${params.baserecalibration ? '--knownSites ' + params.knownSites + ' --out-recal-file ' + sampleName + '_recal.txt ' : ''} --tmp-dir /scratch/vpagano/tmp
     """
 
@@ -117,7 +117,7 @@ process pb_germline {
         path reference
 
     output:
-        tuple val("${sample}"), path("${sample}.bam")
+        tuple val("${sample}"), path("${sample}_pb.bam")
         path("${sample}*")
         tuple val("${sample}"), path("${sample}*.vcf")
 
@@ -133,7 +133,7 @@ process pb_germline {
         module load parabricks/${params.pb_ver} 
         pbrun germline --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
-        --out-bam '${sample}.bam' \
+        --out-bam '${sample}_pb.bam' \
         ${params.gvcf ? '--gvcf ' : ' '} \
         --out-variants '${sample}_pb_haplotypecaller.${params.gvcf ? 'g.' : ''}vcf' \
         --tmp-dir /scratch/vpagano/tmp

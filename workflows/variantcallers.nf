@@ -27,8 +27,8 @@ workflow VARIANTCALLERS {
         // }
 
     emit:
-        vcfFiles
-        publishFiles
+        vcf = vcfFiles
+        publishFiles = publishFiles
 }
 
 workflow HAPLOTYPECALLER {
