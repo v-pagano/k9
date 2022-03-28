@@ -16,3 +16,26 @@ process publishResults {
         echo '${f}'
     """
 }
+
+process dot2svg {
+
+    input:
+        val f
+        val temp
+
+    output:
+        path 'dag.svg'
+
+    cpus 1
+    container params.dagContainer
+
+    when:
+        params.dag
+
+    script:
+    """
+        dot ${f} -Tsvg -o dag.svg
+    """
+
+
+}

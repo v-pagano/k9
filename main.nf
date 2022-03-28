@@ -7,7 +7,9 @@ include { BAMQC } from './workflows/bamqc'
 include { ANNOTATION } from './workflows/annotation'
 include { PB_HAPLOTYPECALLER; PB_DEEPVARIANT; PB_SOMATIC } from './workflows/parabricks'
 include { BAM2PGBAM } from './workflows/petagene'
-include { publishResults } from './process/helpers'
+include { UBAM2FQ; FQ2UBAM } from './workflows/ubam'
+include { publishResults; dot2svg } from './process/helpers'
+include { sam_bam2fq } from './process/sam'
 
 workflow {
 
@@ -48,12 +50,29 @@ workflow {
 
     }
 
+    if (params.inputType == 'ubam') {
+
+        bamFiles = Channel.fromPath(params.input)
+        bams = bamFiles.map { [ it.baseName, it ] }
+
+        UBAM2FQ(bams)
+        fastq = UBAM2FQ.out.map { [ it[0] , [ it[1], it[2] ] ] }
+
+    } 
+    
     if (params.inputType == 'fastq') {
 
         fastq = Channel.fromFilePairs(params.input)
 
+    }
+
+    if (params.inputType == 'fastq' || params.inputType == 'ubam') {
+
         FQ_PREP(fastq)
         publishFiles = publishFiles.mix(FQ_PREP.out)
+
+        FQ2UBAM(fastq)
+        publishFiles = publishFiles.mix(FQ2UBAM.out)
 
         MAPPING(fastq)
         publishFiles = publishFiles.mix(MAPPING.out.publishFiles)
