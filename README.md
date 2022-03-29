@@ -8,86 +8,90 @@ The TARDIS repository is on github. Simply clone that repo and you can run TARDI
 
 ## Running a simple pipeline
 
-Running a pipeline is done through nextflow.  It will also utilize Tower, giving you a nice GUI for run stats and progess. To run a simple pipeline you just run from the command line:
+First thing, you need to let the pipeline know what your input format is.  There are currently 4 possible inputs: fastq, ubam, bam or vcf.  You set this with the inputType parameter like so:
 
-    nextflow run main.nf --input <Your json file>
+    nextflow run main.nf --inputType fastq
 
-This will run an alignment-only pipeline using parabricks.
+Once that is set, simply point to your input files:
 
-### Using csv or tsv for your input file
+    nextflow run main.nf --inputType bam --input "/scratch/vpagano/play/*.bam"
 
-TARDIS also supports csv or tsv files for input.
+Paired fastqs require you to tell nextflow where the _1 or _2 is located in the filename, you do this with the {1,2} setup:
 
-The order for the columns is:
+    nextflow run main.nf --inputType fastq --input "/scratch/vpagano/play/*L1R{1,2}*"
 
-subject
-sex
-status
-sample
-lane
-fastq1
-fastq2
-rg
+Once this done, you simply have to decide what you want to run in the pipeline, for example to run parabricks fq2bam on some fastq files:
 
-This format is also compatible with nf-core pipelines.
+    nextflow run main.nf --inputType fastq --input "/scratch/vpagano/play/*L1R{1,2}*" --parabricks
 
-## Configuring for a different cluster or setup
+## Pipeline parameters
 
-Everything in TARDIS is configurable. Parameters in the nextflow.config file point to all of the containers that are used by TARDIS. If any parameter needs to be tuned for your specific pipeline (# of CPUs for a step, slurm partition to run on, location of reference files), you can create your own copy of the nextflow.config file.  Then run it with this command:
+### Pipeline steps
 
-    nextflow -C my_new_config.config run main.nf --input <Your json file>
+You control which steps that the pipeline should run with command line parameters, they are simply on/off toggles.  For example to run parabricks haplotypecaller on a bam file:
 
-You can also add a separate profile to the nextflow.config file. There are currently four profiles: dback, gemini, local and coh_apps. You can run TARDIS with a profile like this:
+    nextflow run main.nf --inputType bam --input "/scratch/vpagano/play/*.bam" --pb_haplotypecaller
 
-    nextflow run main.nf --input <Your json file> -profile local
+You can string together as many variations as you would like. For example to run bwamem2 alignment with parabricks deepvariant, VEP annotation and fastqc:
 
-You can also run multiple profiles together.  For example to run with the coh_apps containers on dback:
+    nextflow run main.nf --inputType fastq --input "/scratch/vpagano/play/*L1R{1,2}*" --bwa2 --pb_deepvariant --vep --fastqc
 
-    nextflow run main.nf --input <Your json file> -profile coh_apps,dback
+#### Fastq Prep & QC
 
-## Command line parameters
+| Step                               | Parameter           |
+|------------------------------------|---------------------|
+| Run fastqc                         | --fastqc            |
+| Create a uBAM from the fastq files | --ubam              |
+| Run parabricks multiQC             | --pb_collectmetrics |
 
-All steps in TARDIS are optional and can be put in or removed from the command line.  Most are done with true/false.  Here is a breakdown by pipeline_type.
+#### Mapping and alignment
 
-### Pipeline_type
+| Step               | Parameter    |
+|--------------------|--------------|
+| Parabricks fq2bam  | --parabricks |
+| BWA MEM alignment  | --bwa        |
+| BWA MEM2 alignment | --bwa2       |
 
-There are currently 3 different pipeline_types: Alignment, Constitutional and Somatic. You set these with the pipeline_type parameter.
+#### Variant Callers
 
-    nextflow run main.nf --pipeline_type Constitutional --input tumor_100K.json
+| Step                       | Parameter            |
+|----------------------------|----------------------|
+| Parabricks haplotypecaller | --pb_haplotypecaller |
+| Parabricks deepvariant     | --pb_deepvariant     |
 
-### Mapping_type
+#### Annotation
 
-There are currently 3 different mapping_types: bwa, bwa2 and parabricks. You set these with the mapping_type parameter.
+| Step   | Parameter |
+|--------|-----------|
+| SNPEff | --snpeff  |
+| VEP    | --vep     |
 
-    nextflow run main.nf --mapping_type bwa2 --input tumor_100K.json
+#### File output
 
-Note that parabricks requires a GPU node and a parabricks license.
+| Step                         | Parameter         |
+|------------------------------|-------------------|
+| Publish all files            | --publishResults  |
+| Where to output the files    | --outputFolder    |
 
-### Mapping parameters
+#### Other Settings
 
-Base recalibration is off by default but can be enabled with baserelibration flag.
+| Step                    | Parameter           |
+|-------------------------|---------------------|
+| Produce gvcf            | --gvcf              |
+| Use BQSR during mapping | --baserecalibration |
 
-    nextflow run main.nf --mapping_type parabricks --baserecalibration --input tumor_100K.json
+### Profiles
 
-### Variant Callers
+Profiles allow you to change many command line parameters with a simple profile. For example to run with the local profile
 
-There are currently 4 variant callers available: haplotypecaller, deepvariant, pb_haplotypecaller and pb_deepvariant. These are all off by default, but can be turned by adding them to the commmand line.
+    nextflow run main.nf -profile local
 
-    nextflow run main.nf --pipeline_type Constitutional --haplotypecaller --pb_deepvariant --input tumor_100K.json
+Here are the current profiles:
 
-### Annotation
-
-Currently VEP and snpeff are available. These are all off by default, but can be turned by setting them to true on the commmand line.
-
-    nextflow run main.nf --pipeline_type Constitutional --haplotypecaller --vep --input tumor_100K.json
-
-### Using a different reference
-
-TARDIS defaults to a human reference for mapping. To use a different reference change either the reference or pb_reference in the options. These are normally hidden, but you can toggle to make them viewable.
-
-## Publishing results
-
-If you want to copy your output files (BAMs, VCFs etc) to a directory, set the publishResults flag and set the outputFolder.
-
-    nextflow run main.nf --outputFolder /scratch/vpagano/results --publishResults
-
+| Profile | Modifications                                 |
+|---------|-----------------------------------------------|
+| dback   | Configured for the dback cluster              |
+| gemini  | Configured for the gemini cluster             |
+| local   | Configured to run on a single local node      |
+| k9      | Configured to use boxer Tasha reference       |
+| reports | Outputs reports on CPU usage and elapsed time |

@@ -43,7 +43,7 @@ workflow {
         ANNOTATION(VARIANTCALLERS.out[0])
         publishFiles = publishFiles.mix(ANNOTATION.out)
 
-        BAM2PGBAM(bamFiles)
+        BAM2PGBAM(bams)
         publishFiles = publishFiles.mix(BAM2PGBAM.out)
 
         publishResults(publishFiles.flatten())
