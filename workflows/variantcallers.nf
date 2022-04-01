@@ -20,9 +20,11 @@ workflow VARIANTCALLERS {
         publishFiles = publishFiles.mix(pb_deepvariant.out[1].flatten())
         vcfFiles = vcfFiles.mix(pb_deepvariant.out[0])
 
-        HAPLOTYPECALLER(bam)
-        publishFiles = publishFiles.mix(HAPLOTYPECALLER.out.flatten())
-        vcfFiles = vcfFiles.mix(HAPLOTYPECALLER.out)
+        if (params.haplotypecaller) {
+            HAPLOTYPECALLER(bam)
+            publishFiles = publishFiles.mix(HAPLOTYPECALLER.out.flatten())
+            vcfFiles = vcfFiles.mix(HAPLOTYPECALLER.out)
+        }
 
     emit:
         vcf = vcfFiles
