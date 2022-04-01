@@ -58,6 +58,7 @@ You can string together as many variations as you would like. For example to run
 |----------------------------|----------------------|
 | Parabricks haplotypecaller | --pb_haplotypecaller |
 | Parabricks deepvariant     | --pb_deepvariant     |
+| GATK haplotypecaller       | --haplotypecaller    |
 
 #### Annotation
 

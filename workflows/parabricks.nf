@@ -19,6 +19,7 @@ workflow PB_RNA_FQ2BAM {
 
     main:
         pb_rna_fq2bam(fileTuple.flatten().map { ' --in-fq ' + it.r1 + ' ' + it.r2 + ' "' + it.rg + '" ' }.toList())
+  
     emit:
         pb_rna_fq2bam.out
 }
@@ -61,6 +62,7 @@ workflow PB_DEEPVARIANT {
 
     main:
         pb_deepvariant(bamFile)
+
     emit:
         pb_deepvariant.out
 }
@@ -72,6 +74,7 @@ workflow PB_HAPLOTYPECALLER {
 
     main:
         pb_haplotypecaller(bamFile, sampleName)
+
     emit:
         pb_haplotypecaller.out
 }

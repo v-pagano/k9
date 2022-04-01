@@ -20,11 +20,9 @@ workflow VARIANTCALLERS {
         publishFiles = publishFiles.mix(pb_deepvariant.out[1].flatten())
         vcfFiles = vcfFiles.mix(pb_deepvariant.out[0])
 
-        // if (params.haplotypecaller) {
-        //     HAPLOTYPECALLER(bam)
-        //     publishFiles = publishFiles.mix(HAPLOTYPECALLER.out.flatten())
-        //     vcfFiles = vcfFiles.mix(HAPLOTYPECALLER.out)
-        // }
+        HAPLOTYPECALLER(bam)
+        publishFiles = publishFiles.mix(HAPLOTYPECALLER.out.flatten())
+        vcfFiles = vcfFiles.mix(HAPLOTYPECALLER.out)
 
     emit:
         vcf = vcfFiles
@@ -45,7 +43,11 @@ workflow HAPLOTYPECALLER {
             arrInt = interval.collect { ' -L "' + it.contig + ':' + it.start + '-' + it.stop + '" '}
         }
         
-        output = haplotypecaller(bam, arrInt) | vcf_merge
+        haplotypecaller(bam, arrInt)
+        sample = bam.map { it[0] }
+        vcfFiles = haplotypecaller.out.map { it[1] }
+        tempVCF = vcfFiles.collect()
+        output = vcf_merge(sample, tempVCF)
 
     emit:
         output

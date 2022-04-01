@@ -24,7 +24,8 @@
                     "enum": [
                         "fastq",
                         "bam",
-                        "vcf"
+                        "vcf",
+                        "ubam"
                     ]
                 }
             }
