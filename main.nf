@@ -13,6 +13,11 @@ include { sam_bam2fq } from './process/sam'
 
 workflow {
 
+    if (params.usegpu03) {
+        params.gpuClusterOptions = '--nodelist=dback-gpu03'
+        params.gpuPartition = 'gpu-dev'
+    }
+    
     publishFiles = Channel.empty()
     bamFiles = Channel.empty()
     vcfFiles = Channel.empty()

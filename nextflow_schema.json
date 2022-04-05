@@ -113,6 +113,12 @@
                     "type": "string",
                     "description": "Reference for Parabricks?",
                     "hidden": true
+                },
+                "usegpu03": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Should we use dback-gpu03",
+                    "hidden": true
                 }
             }
         }
