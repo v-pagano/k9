@@ -7,8 +7,8 @@ process pb_fq2bam {
         tuple val("${sample}"), path("${sample}_pb.bam")
         path("${sample}*")
 
-    queue params.gpuPartition
-    clusterOptions "--exclusive ${params.gpuClusterOptions}"
+    queue (params.usegpu03 ? 'gpu-dev' : params.gpuPartition)
+    clusterOptions (params.usegpu03 ? '--nodelist=dback-gpu03 --exclusive' : "--exclusive ${params.gpuClusterOptions}")
 
     when:
         params.parabricks && !params.pb_haplotypecaller
