@@ -1,5 +1,6 @@
 include { pb_fq2bam; pb_germline } from '../process/parabricks'
 include { BWA; BWA2 } from './bwa'
+include { PB_FQ2BAM; PB_GERMLINE } from './parabricks'
 
 workflow MAPPING {
     take:
@@ -11,14 +12,14 @@ workflow MAPPING {
         bamFiles = Channel.empty()
         vcfFiles = Channel.empty()
 
-        pb_fq2bam(fastq, params.pb_reference) 
-        publishFiles = publishFiles.mix(pb_fq2bam.out[1].flatten())
-        bamFiles = bamFiles.mix(pb_fq2bam.out[0])
+        PB_FQ2BAM(fastq, params.pb_reference) 
+        publishFiles = publishFiles.mix(PB_FQ2BAM.out.publishFiles.flatten())
+        bamFiles = bamFiles.mix(PB_FQ2BAM.out.bamFiles)
 
-        pb_germline(fastq, params.pb_reference)
-        publishFiles = publishFiles.mix(pb_germline.out[1].flatten())
-        bamFiles = bamFiles.mix(pb_germline.out[0])
-        vcfFiles = vcfFiles.mix(pb_germline.out[2])
+        PB_GERMLINE(fastq, params.pb_reference)
+        publishFiles = publishFiles.mix(PB_GERMLINE.out.publishFiles.flatten())
+        bamFiles = bamFiles.mix(PB_GERMLINE.out.bam)
+        vcfFiles = vcfFiles.mix(PB_GERMLINE.out.vcf)
 
         if (params.bwa) {
             BWA(fastq)
@@ -31,7 +32,7 @@ workflow MAPPING {
             publishFiles = publishFiles.mix(BWA2.out[1].flatten())
             bamFiles = bamFiles.mix(BWA2.out[0])
         }
-        
+
     emit:
         bam = bamFiles
         publishFiles = publishFiles

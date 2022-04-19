@@ -7,6 +7,7 @@ include { BAMQC } from './workflows/bamqc'
 include { ANNOTATION } from './workflows/annotation'
 include { PB_HAPLOTYPECALLER; PB_DEEPVARIANT; PB_SOMATIC } from './workflows/parabricks'
 include { BAM2PGBAM } from './workflows/petagene'
+include { petageneExpandFasterq; petageneCompressBAM } from './process/petagene'
 include { UBAM2FQ; FQ2UBAM } from './workflows/ubam'
 include { publishResults; dot2svg } from './process/helpers'
 include { sam_bam2fq } from './process/sam'
@@ -43,8 +44,8 @@ workflow {
         ANNOTATION(VARIANTCALLERS.out[0])
         publishFiles = publishFiles.mix(ANNOTATION.out)
 
-        BAM2PGBAM(bams)
-        publishFiles = publishFiles.mix(BAM2PGBAM.out)
+        // BAM2PGBAM(bams)
+        // publishFiles = publishFiles.mix(BAM2PGBAM.out)
 
         publishResults(publishFiles.flatten())
 
@@ -68,6 +69,10 @@ workflow {
 
     if (params.inputType == 'fastq' || params.inputType == 'ubam') {
 
+        if (params.petagene) {
+            fastq = petageneExpandFasterq(fastq, params.species, params.datasteward)
+        }
+
         FQ_PREP(fastq)
         publishFiles = publishFiles.mix(FQ_PREP.out)
 
@@ -86,8 +91,8 @@ workflow {
         ANNOTATION(VARIANTCALLERS.out[0])
         publishFiles = publishFiles.mix(ANNOTATION.out)
 
-        BAM2PGBAM(MAPPING.out.bam)
-        publishFiles = publishFiles.mix(BAM2PGBAM.out)
+        // BAM2PGBAM(MAPPING.out.bam)
+        // publishFiles = publishFiles.mix(BAM2PGBAM.out)
 
         publishResults(publishFiles.flatten())
 

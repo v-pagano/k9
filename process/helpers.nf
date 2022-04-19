@@ -39,3 +39,22 @@ process dot2svg {
 
 
 }
+
+process gzip {
+
+    input:
+        tuple val(meta), path(f)
+
+    output:
+        path "*.gz"
+
+    container 'docker://ghcr.io/v-pagano/pigz'
+
+    cpus 24
+
+    script:
+    """
+        pigz -f -p 24 ${f} 
+    """
+
+}

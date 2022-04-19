@@ -4,8 +4,8 @@ process pb_fq2bam {
         path reference
 
     output:
-        tuple val("${sample}"), path("${sample}_pb.bam")
-        path("${sample}*")
+        tuple val("${sample}"), path("${sample}_pb.bam"), emit: bam
+        path("${sample}*"), emit: publishFiles
 
     queue (params.usegpu03 ? 'gpu-dev' : params.gpuPartition)
     clusterOptions (params.usegpu03 ? '--nodelist=dback-gpu03 --exclusive' : "--exclusive ${params.gpuClusterOptions}")
@@ -59,7 +59,6 @@ process pb_deepvariant {
     output:
         tuple val("${sample}"), path("${sample}*deepvariant.vcf")
         file "${sample}*"
-        tuple val("${sample}"), path("${sample}*.g.vcf")
 
     queue params.gpuPartition
     clusterOptions "--exclusive ${params.gpuClusterOptions}"
@@ -116,9 +115,9 @@ process pb_germline {
         path reference
 
     output:
-        tuple val("${sample}"), path("${sample}_pb.bam")
-        path("${sample}*")
-        tuple val("${sample}"), path("${sample}*.vcf")
+        tuple val("${sample}"), path("${sample}_pb.bam"), emit: bam
+        path("${sample}*"), emit: publishFiles
+        tuple val("${sample}"), path("${sample}*.vcf"), emit: vcf
 
     queue params.gpuPartition
     clusterOptions "--exclusive ${params.gpuClusterOptions}"

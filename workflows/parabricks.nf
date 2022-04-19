@@ -1,17 +1,25 @@
 include { pb_fq2bam; pb_germline; pb_haplotypecaller; pb_deepvariant; pb_somatic } from '../process/parabricks.nf'
+include { petageneCompressBAM; petageneEncryptVCF } from '../process/petagene.nf'
+include { gzip } from '../process/helpers.nf'
 
 workflow PB_FQ2BAM {
     take: 
-        fileTuple
-        sampleName
+        fq
+        reference
 
     main:
-        infq = []
-        infq = fileTuple.collect { ' --in-fq ' + it.fastq1 + ' ' + it.fastq2 + ' "' + it.rg + '" ' }
-        pb_fq2bam([[sampleName, [fileTuple.fastq1[0], fileTuple.fastq2[0]]]])
+        pb_fq2bam(fq, reference)
+        bamfiles = pb_fq2bam.out.bam
+        if (params.petagene) {
+            petageneCompressBAM(pb_fq2bam.out.bam, params.species, params.encrypt, params.datasteward)
+            publishFiles = petageneCompressBAM.out.publishFiles
+        } else {
+            publishFiles = pb_fq2bam.out.publishFiles
+        }
 
     emit:
-        pb_fq2bam.out[1]
+        bamFiles = bamfiles
+        publishFiles = publishFiles
 }
 
 workflow PB_RNA_FQ2BAM {
@@ -41,18 +49,28 @@ workflow PB_SOMATIC {
 }
 
 workflow PB_GERMLINE {
-    take:         
-        fileTuple
-        sampleName
-
+    take: 
+        fq
+        reference
 
     main:
-        infq = []
-        infq = fileTuple.collect { ' --in-fq ' + it.fastq1 + ' ' + it.fastq2 + ' "' + it.rg + '" ' }
-
-        pb_germline([[sampleName, [fileTuple.fastq1[0], fileTuple.fastq2[0]]]])
+        pb_germline(fq, reference)
+        bamfiles = pb_germline.out.bam
+        if (params.petagene) {
+            petageneCompressBAM(pb_germline.out.bam, params.species, params.encrypt, params.datasteward)
+            petageneEncryptVCF(pb_germline.out.vcf, params.species, params.encrypt, params.datasteward)
+            publishFiles = petageneCompressBAM.out.publishFiles.mix(petageneEncryptVCF.out.publishFiles)
+            vcfout = pb_germline.out.vcf
+        } else {
+            gzip(pb_germline.out.vcf)
+            publishFiles = pb_germline.out.publishFiles.mix(gzip.out)
+            vcfout = gzip.out
+        }
+        
     emit:
-        pb_germline.out[1]
+        bam = bamfiles
+        publishFiles = publishFiles
+        vcf = vcfout
 }
 
 workflow PB_DEEPVARIANT {
