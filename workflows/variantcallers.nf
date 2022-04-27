@@ -1,6 +1,6 @@
 import org.yaml.snakeyaml.Yaml
 
-include { pb_haplotypecaller; pb_deepvariant } from '../process/parabricks'
+include { pb_haplotypecaller; pb_deepvariant; pb_cnvkit } from '../process/parabricks'
 include { haplotypecaller; vcf_merge; make_examples; call_variants; post_process_calls; filter_variants } from '../process/variantcallers'
 
 workflow VARIANTCALLERS {
@@ -19,6 +19,9 @@ workflow VARIANTCALLERS {
         pb_deepvariant(bam, params.pb_reference)
         publishFiles = publishFiles.mix(pb_deepvariant.out[1].flatten())
         vcfFiles = vcfFiles.mix(pb_deepvariant.out[0])
+
+        pb_cnvkit(bam, params.pb_reference)
+        publishFiles = publishFiles.mix(pb_cnvkit.out.flatten())
 
         if (params.haplotypecaller) {
             HAPLOTYPECALLER(bam)

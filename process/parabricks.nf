@@ -273,3 +273,30 @@ process pb_somaticTumorOnly {
     """
 
 }
+
+process pb_cnvkit {
+
+    input:
+        tuple val(sample), path(bam)
+        path reference
+
+    output:
+        file "${sample}-cnvkit/"
+
+    queue params.gpuPartition
+    clusterOptions "--exclusive ${params.gpuClusterOptions}"
+
+    when:
+        params.pb_cnvkit
+
+    script:
+    """
+        source /etc/profile.d/modules.sh
+        module load parabricks/${params.pb_ver} 
+        pbrun cnvkit --ref ${reference} \
+        --in-bam ${bam} \
+        --output-dir '${sample}-cnvkit' \
+        --tmp-dir /scratch/vpagano/tmp
+
+    """
+}
