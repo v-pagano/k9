@@ -6,12 +6,12 @@ process haplotypecaller {
     output:
         tuple val(sample), path("${sample}.g.vcf.gz")
 
+    maxForks 20
+    cpus params.haplotypecallerCpus
     container params.gatkContainer
 
     when:
         params.haplotypecaller
-
-    cpus params.haplotypecallerCpus
 
     script:
         """
@@ -34,6 +34,9 @@ process vcf_merge {
         file "${sample}*"
 
     container params.gatkContainer
+
+    cpus params.haplotypecallerCpus
+
 
     script:
     """

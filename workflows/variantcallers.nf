@@ -41,10 +41,19 @@ workflow HAPLOTYPECALLER {
         intervals = parser.load((params.HaplotypecallerIntervalsYaml as File).text)
 
         txtInt = ''
+        arrInt = []
+        // for (interval in intervals.calling_intervals) {
+        //     for (i in interval) {
+        //         txtInt = ' -L "' + i.contig + ':' + i.start + '-' + i.stop + '" '
+        //         arrInt.add(txtInt)
+        //     }
+        // }
+
         for (interval in intervals.calling_intervals) {
-            arrInt = interval.collect { ' -L "' + it.contig + ':' + it.start + '-' + it.stop + '" '}
+            txtInt = interval.collect { ' -L "' + it.contig + ':' + it.start + '-' + it.stop + '" '}.join(' ')
+            arrInt.add(txtInt)
         }
-        
+
         haplotypecaller(bam, arrInt)
         sample = bam.map { it[0] }
         vcfFiles = haplotypecaller.out.map { it[1] }

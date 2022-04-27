@@ -1,4 +1,4 @@
-include { pb_fq2bam; pb_germline; pb_haplotypecaller; pb_deepvariant; pb_somatic } from '../process/parabricks.nf'
+include { pb_fq2bam; pb_germline; pb_deepvariant_germline; pb_haplotypecaller; pb_deepvariant; pb_somatic } from '../process/parabricks.nf'
 include { petageneCompressBAM; petageneEncryptVCF } from '../process/petagene.nf'
 include { gzip } from '../process/helpers.nf'
 
@@ -72,6 +72,32 @@ workflow PB_GERMLINE {
         publishFiles = publishFiles
         vcf = vcfout
 }
+
+workflow PB_DEEPVARIANT_GERMLINE {
+    take: 
+        fq
+        reference
+
+    main:
+        pb_deepvariant_germline(fq, reference)
+        bamfiles = pb_deepvariant_germline.out.bam
+        if (params.petagene) {
+            petageneCompressBAM(pb_deepvariant_germline.out.bam, params.species, params.encrypt, params.datasteward)
+            petageneEncryptVCF(pb_deepvariant_germline.out.vcf, params.species, params.encrypt, params.datasteward)
+            publishFiles = petageneCompressBAM.out.publishFiles.mix(petageneEncryptVCF.out.publishFiles)
+            vcfout = pb_deepvariant_germline.out.vcf
+        } else {
+            gzip(pb_deepvariant_germline.out.vcf)
+            publishFiles = pb_deepvariant_germline.out.publishFiles.mix(gzip.out)
+            vcfout = gzip.out
+        }
+        
+    emit:
+        bam = bamfiles
+        publishFiles = publishFiles
+        vcf = vcfout
+}
+
 
 workflow PB_DEEPVARIANT {
     take:         

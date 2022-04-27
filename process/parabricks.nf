@@ -11,7 +11,7 @@ process pb_fq2bam {
     clusterOptions (params.usegpu03 ? '--nodelist=dback-gpu03 --exclusive' : "--exclusive ${params.gpuClusterOptions}")
 
     when:
-        params.parabricks && !params.pb_haplotypecaller
+        params.parabricks && !params.pb_haplotypecaller && !params.pb_deepvariant 
 
     script:
     """
@@ -19,7 +19,7 @@ process pb_fq2bam {
         module load parabricks/${params.pb_ver} 
         pbrun fq2bam --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
-        --out-bam '${sample}_pb.bam' \
+        --out-bam '${sample}_pb.bam' ${params.usegpu03 ? '--num-gpus 5' : ''} \
         ${params.baserecalibration ? '--knownSites ' + params.knownSites + ' --out-recal-file ' + sampleName + '_recal.txt ' : ''} --tmp-dir /scratch/vpagano/tmp
     """
 
@@ -64,7 +64,7 @@ process pb_deepvariant {
     clusterOptions "--exclusive ${params.gpuClusterOptions}"
 
     when:
-        params.pb_deepvariant
+        (params.pb_deepvariant && !params.parabricks && params.inputType == 'fastq') || (params.inputType == 'bam' && params.pb_deepvariant)
 
     script:
     """
@@ -119,8 +119,8 @@ process pb_germline {
         path("${sample}*"), emit: publishFiles
         tuple val("${sample}"), path("${sample}*.vcf"), emit: vcf
 
-    queue params.gpuPartition
-    clusterOptions "--exclusive ${params.gpuClusterOptions}"
+    queue (params.usegpu03 ? 'gpu-dev' : params.gpuPartition)
+    clusterOptions (params.usegpu03 ? '--nodelist=dback-gpu03 --exclusive' : "--exclusive ${params.gpuClusterOptions}")
 
     when:
         params.parabricks && params.pb_haplotypecaller
@@ -131,9 +131,39 @@ process pb_germline {
         module load parabricks/${params.pb_ver} 
         pbrun germline --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
-        --out-bam '${sample}_pb.bam' \
+        --out-bam '${sample}_pb.bam' ${params.usegpu03 ? '--num-gpus 5 --gpu-devices 0,1,3,4,5' : ''} \
         ${params.gvcf ? '--gvcf ' : ' '} \
         --out-variants '${sample}_pb_haplotypecaller.${params.gvcf ? 'g.' : ''}vcf' \
+        --tmp-dir /scratch/vpagano/tmp
+    """
+
+}
+
+process pb_deepvariant_germline {
+    input:
+        tuple val(sample), val(fq)
+        path reference
+
+    output:
+        tuple val("${sample}"), path("${sample}_pb.bam"), emit: bam
+        path("${sample}*"), emit: publishFiles
+        tuple val("${sample}"), path("${sample}*.vcf"), emit: vcf
+
+    queue (params.usegpu03 ? 'gpu-dev' : params.gpuPartition)
+    clusterOptions (params.usegpu03 ? '--nodelist=dback-gpu03 --exclusive' : "--exclusive ${params.gpuClusterOptions}")
+
+    when:
+        params.parabricks && params.pb_deepvariant
+
+    script:
+    """
+        source /etc/profile.d/modules.sh
+        module load parabricks/${params.pb_ver} 
+        pbrun germline --bwa-options '-K 100000000 -Y' --ref ${reference} \
+        --in-fq ${fq[0]} ${fq[1]} \
+        --out-bam '${sample}_pb.bam' ${params.usegpu03 ? '--num-gpus 5 --gpu-devices 0,1,3,4,5' : ''} \
+        ${params.gvcf ? '--gvcf ' : ' '} \
+        --out-variants '${sample}_pb_deepvariant.${params.gvcf ? 'g.' : ''}vcf' \
         --tmp-dir /scratch/vpagano/tmp
     """
 
@@ -216,4 +246,30 @@ process pb_collectmetrics {
         --tmp-dir /scratch/vpagano/tmp
 
     """
+}
+
+process pb_somaticTumorOnly {
+    input:
+        tuple val(sample), path(fq)
+        path reference
+
+    output:
+        tuple val("${sample}"), path("${sample}_tumor_pb.bam"), emit: bam
+        path("${sample}*"), emit: publishFiles
+        tuple val("${sample}"), path("${sample}_pb_mutect.vcf"), emit: vcf
+        
+    queue (params.usegpu03 ? 'gpu-dev' : params.gpuPartition)
+    clusterOptions (params.usegpu03 ? '--nodelist=dback-gpu03 --exclusive' : "--exclusive ${params.gpuClusterOptions}")
+
+    script:
+    """
+        source /etc/profile.d/modules.sh
+        module load parabricks/${params.pb_ver} 
+        pbrun somatic --ref ${params.pb_reference} \
+        --in-tumor-fq ${fq[0]} ${fq[1]} \
+        --out-vcf '${sample}_pb_mutect.vcf' \
+        --out-tumor-bam '${sample}_tumor_pb.bam' ${params.usegpu03 ? '--num-gpus 5 --gpu-devices 0,1,3,4,5' : ''} \
+        --tmp-dir /scratch/vpagano/tmp
+    """
+
 }
