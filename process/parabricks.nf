@@ -300,3 +300,57 @@ process pb_cnvkit {
 
     """
 }
+
+process pb_manta_normalOnly {
+    input:
+        tuple val(sample), path(bam)
+        path reference
+
+    output:
+        tuple val("${sample}"), path("${sample}*")
+        path "${sample}_pb_manta.manta_work"
+
+    when:
+        params.pb_manta
+
+    cpus mantaCpus
+
+    script:
+    """
+        source /etc/profile.d/modules.sh
+        module load parabricks/${params.pb_ver} 
+        pbrun manta --ref ${reference} \
+        --in-normal-bam '${bam}' \
+        --num-threads ${task.cpus} \
+        --out-prefix ${sample}_pb_manta \
+        --tmp-dir /scratch/vpagano/tmp
+    """
+
+}
+
+process pb_strelka_normalOnly {
+    input:
+        tuple val(sample), path(bam)
+        path reference
+
+    output:
+        tuple val("${sample}"), path("${sample}*")
+        path "${sample}_pb_strelka.strelka_work"
+
+    when:
+        params.pb_strelka
+
+    cpus params.strelkaCpus
+
+    script:
+    """
+        source /etc/profile.d/modules.sh
+        module load parabricks/${params.pb_ver} 
+        pbrun strelka --ref ${reference} \
+        --in-bams '${bam}' \
+        --num-threads ${task.cpus} \
+        --out-prefix ${sample}_pb_strelka \
+        --tmp-dir /scratch/vpagano/tmp
+    """
+
+}

@@ -1,6 +1,6 @@
 import org.yaml.snakeyaml.Yaml
 
-include { pb_haplotypecaller; pb_deepvariant; pb_cnvkit } from '../process/parabricks'
+include { pb_haplotypecaller; pb_deepvariant; pb_cnvkit; pb_manta_normalOnly; pb_strelka_normalOnly  } from '../process/parabricks'
 include { haplotypecaller; vcf_merge; make_examples; call_variants; post_process_calls; filter_variants } from '../process/variantcallers'
 
 workflow VARIANTCALLERS {
@@ -22,6 +22,12 @@ workflow VARIANTCALLERS {
 
         pb_cnvkit(bam, params.pb_reference)
         publishFiles = publishFiles.mix(pb_cnvkit.out.flatten())
+
+        pb_manta_normalOnly(bam, params.pb_reference)
+        publishFiles = publishFiles.mix(pb_manta_normalOnly.out[1].flatten())
+
+        pb_strelka_normalOnly(bam, params.pb_reference)
+        publishFiles = publishFiles.mix(pb_strelka_normalOnly.out[1].flatten())
 
         if (params.haplotypecaller) {
             HAPLOTYPECALLER(bam)

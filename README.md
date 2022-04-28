@@ -60,6 +60,8 @@ You can string together as many variations as you would like. For example to run
 | Parabricks deepvariant     | --pb_deepvariant     |
 | GATK haplotypecaller       | --haplotypecaller    |
 | CNVkit                     | --pb_cnvkit          |
+| Manta                      | --pb_manta           |
+| Strelka                    | --pb_strelka         |
 
 
 #### Annotation
