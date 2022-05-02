@@ -283,8 +283,7 @@ process pb_cnvkit {
     output:
         file "${sample}-cnvkit/"
 
-    queue params.gpuPartition
-    clusterOptions "--exclusive ${params.gpuClusterOptions}"
+    cpus params.cnvkitCpus
 
     when:
         params.pb_cnvkit

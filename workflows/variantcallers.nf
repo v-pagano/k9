@@ -23,12 +23,16 @@ workflow VARIANTCALLERS {
         pb_cnvkit(bam, params.pb_reference)
         publishFiles = publishFiles.mix(pb_cnvkit.out.flatten())
 
-        pb_manta_normalOnly(bam, params.pb_reference)
-        publishFiles = publishFiles.mix(pb_manta_normalOnly.out[1].flatten())
+        if (params.pb_manta) {
+            pb_manta_normalOnly(bam, params.pb_reference)
+            publishFiles = publishFiles.mix(pb_manta_normalOnly.out[1].flatten())
+        }
 
-        pb_strelka_normalOnly(bam, params.pb_reference)
-        publishFiles = publishFiles.mix(pb_strelka_normalOnly.out[1].flatten())
-
+        if (params.pb_strelka) {
+            pb_strelka_normalOnly(bam, params.pb_reference)
+            publishFiles = publishFiles.mix(pb_strelka_normalOnly.out[1].flatten())
+        }
+        
         if (params.haplotypecaller) {
             HAPLOTYPECALLER(bam)
             publishFiles = publishFiles.mix(HAPLOTYPECALLER.out.flatten())
