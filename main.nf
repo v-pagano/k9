@@ -69,9 +69,9 @@ workflow {
 
     if (params.inputType == 'fastq' || params.inputType == 'ubam') {
 
-        if (params.petagene) {
-            fastq = petageneExpandFasterq(fastq, params.species, params.datasteward)
-        }
+        // if (params.petagene) {
+        //     fastq = petageneExpandFasterq(fastq, params.species, params.datasteward)
+        // }
 
         FQ_PREP(fastq)
         publishFiles = publishFiles.mix(FQ_PREP.out)

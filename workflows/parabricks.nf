@@ -10,12 +10,12 @@ workflow PB_FQ2BAM {
     main:
         pb_fq2bam(fq, reference)
         bamfiles = pb_fq2bam.out.bam
-        if (params.petagene) {
-            petageneCompressBAM(pb_fq2bam.out.bam, params.species, params.encrypt, params.datasteward)
-            publishFiles = petageneCompressBAM.out.publishFiles
-        } else {
+        // if (params.petagene) {
+        //     petageneCompressBAM(pb_fq2bam.out.bam, params.species, params.encrypt, params.datasteward)
+        //     publishFiles = petageneCompressBAM.out.publishFiles
+        // } else {
             publishFiles = pb_fq2bam.out.publishFiles
-        }
+        // }
 
     emit:
         bamFiles = bamfiles
@@ -56,16 +56,16 @@ workflow PB_GERMLINE {
     main:
         pb_germline(fq, reference)
         bamfiles = pb_germline.out.bam
-        if (params.petagene) {
-            petageneCompressBAM(pb_germline.out.bam, params.species, params.encrypt, params.datasteward)
-            petageneEncryptVCF(pb_germline.out.vcf, params.species, params.encrypt, params.datasteward)
-            publishFiles = petageneCompressBAM.out.publishFiles.mix(petageneEncryptVCF.out.publishFiles)
-            vcfout = pb_germline.out.vcf
-        } else {
+        // if (params.petagene) {
+        //     petageneCompressBAM(pb_germline.out.bam, params.species, params.encrypt, params.datasteward)
+        //     petageneEncryptVCF(pb_germline.out.vcf, params.species, params.encrypt, params.datasteward)
+        //     publishFiles = petageneCompressBAM.out.publishFiles.mix(petageneEncryptVCF.out.publishFiles)
+        //     vcfout = pb_germline.out.vcf
+        // } else {
             gzip(pb_germline.out.vcf)
             publishFiles = pb_germline.out.publishFiles.mix(gzip.out)
             vcfout = gzip.out
-        }
+        // }
         
     emit:
         bam = bamfiles

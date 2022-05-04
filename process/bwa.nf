@@ -15,6 +15,7 @@ process bwa_mem {
 
     script:
         """
+            ${params.petagene ? 'LD_PRELOAD=' + params.petalinkModule : ''} \
             bwa mem -v 3 -Y -K 100000000 -t ${params.bwamemCpus} \
             '${params.pb_reference}' \
             -R '@RG\\tID:${sample}\\tLB:lib1\\tPL:bar\\tSM:sample\\tPU:${sample}' \

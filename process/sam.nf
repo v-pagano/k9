@@ -44,11 +44,15 @@ process sam_merge {
         tuple val(sample), path("${sample}_${suffix}.md.bam"), emit: bam
         path "${sample}*", emit: publishFiles
 
+    
     cpus params.samtoolsCpus
     container params.samtoolsContainer
 
+
     script:
     """
+        ${params.petagene ? 'PetaLinkMode=+write' : ''} \
+        ${params.petagene ? 'LD_PRELOAD=' + params.petalinkModule : ''} \
         samtools markdup \
             -d 2500 \
             --no-multi-dup \
@@ -59,6 +63,5 @@ process sam_merge {
             ${f[0]} \
             "${sample}_${suffix}.md.bam"
     """
-        // samtools merge --threads ${task.cpus} -c -f -l 6 "${sample}_${suffix}.bam" ${f.join(' ')}
 
 }

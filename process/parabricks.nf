@@ -16,11 +16,15 @@ process pb_fq2bam {
     script:
     """
         source /etc/profile.d/modules.sh
-        module load parabricks/${params.pb_ver} 
+        module load parabricks/${params.pb_ver}
+        ${params.petagene ? 'LD_PRELOAD=' + params.petalinkModule : ''} \
+        ${params.petagene ? 'SINGULARITYENV_LD_PRELOAD=' + params.petalinkModule : ''} \
         pbrun fq2bam --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
         --out-bam '${sample}_pb.bam' ${params.usegpu03 ? '--num-gpus 5' : ''} \
-        ${params.baserecalibration ? '--knownSites ' + params.knownSites + ' --out-recal-file ' + sampleName + '_recal.txt ' : ''} --tmp-dir /scratch/vpagano/tmp
+        ${params.petagene ? '--with-petagene-dir ' + params.petageneFolder : ''} \
+        ${params.baserecalibration ? '--knownSites ' + params.knownSites + ' --out-recal-file ' + sampleName + '_recal.txt ' : ''} \
+        --tmp-dir /scratch/vpagano/tmp
     """
 
 }
@@ -129,10 +133,13 @@ process pb_germline {
     """
         source /etc/profile.d/modules.sh
         module load parabricks/${params.pb_ver} 
+        ${params.petagene ? 'LD_PRELOAD=' + params.petalinkModule : ''} \
+        ${params.petagene ? 'SINGULARITYENV_LD_PRELOAD=' + params.petalinkModule : ''} \
         pbrun germline --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
         --out-bam '${sample}_pb.bam' ${params.usegpu03 ? '--num-gpus 5 --gpu-devices 0,1,3,4,5' : ''} \
         ${params.gvcf ? '--gvcf ' : ' '} \
+        ${params.petagene ? '--with-petagene-dir ' + params.petageneFolder : ''} \
         --out-variants '${sample}_pb_haplotypecaller.${params.gvcf ? 'g.' : ''}vcf' \
         --tmp-dir /scratch/vpagano/tmp
     """
@@ -309,10 +316,11 @@ process pb_manta_normalOnly {
         tuple val("${sample}"), path("${sample}*")
         path "${sample}_pb_manta.manta_work"
 
+    cpus params.mantaCpus
+
     when:
         params.pb_manta
 
-    cpus mantaCpus
 
     script:
     """
