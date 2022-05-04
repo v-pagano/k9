@@ -16,7 +16,7 @@ process haplotypecaller {
     script:
         """
             gatk HaplotypeCaller \
-            --input "${sample}.bam" \
+            --input "${bam}" \
             -O "${sample}.g.vcf.gz" \
             --reference ${params.reference} \
             --java-options "-Xmx14G" \
