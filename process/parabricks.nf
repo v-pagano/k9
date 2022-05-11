@@ -21,7 +21,7 @@ process pb_fq2bam {
         ${params.petagene ? 'SINGULARITYENV_LD_PRELOAD=' + params.petalinkModule : ''} \
         pbrun fq2bam --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
-        --out-bam '${sample}_pb.bam' ${params.usegpu03 ? '--num-gpus 5' : ''} \
+        --out-bam '${sample}_pb.bam' \
         ${params.petagene ? '--with-petagene-dir ' + params.petageneFolder : ''} \
         ${params.baserecalibration ? '--knownSites ' + params.knownSites + ' --out-recal-file ' + sampleName + '_recal.txt ' : ''} \
         --tmp-dir /scratch/vpagano/tmp
@@ -137,7 +137,7 @@ process pb_germline {
         ${params.petagene ? 'SINGULARITYENV_LD_PRELOAD=' + params.petalinkModule : ''} \
         pbrun germline --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
-        --out-bam '${sample}_pb.bam' ${params.usegpu03 ? '--num-gpus 5 --gpu-devices 0,1,3,4,5' : ''} \
+        --out-bam '${sample}_pb.bam' \
         ${params.gvcf ? '--gvcf ' : ' '} \
         ${params.petagene ? '--with-petagene-dir ' + params.petageneFolder : ''} \
         --out-variants '${sample}_pb_haplotypecaller.${params.gvcf ? 'g.' : ''}vcf' \
@@ -168,7 +168,7 @@ process pb_deepvariant_germline {
         module load parabricks/${params.pb_ver} 
         pbrun germline --bwa-options '-K 100000000 -Y' --ref ${reference} \
         --in-fq ${fq[0]} ${fq[1]} \
-        --out-bam '${sample}_pb.bam' ${params.usegpu03 ? '--num-gpus 5 --gpu-devices 0,1,3,4,5' : ''} \
+        --out-bam '${sample}_pb.bam' \
         ${params.gvcf ? '--gvcf ' : ' '} \
         --out-variants '${sample}_pb_deepvariant.${params.gvcf ? 'g.' : ''}vcf' \
         --tmp-dir /scratch/vpagano/tmp
@@ -275,7 +275,7 @@ process pb_somaticTumorOnly {
         pbrun somatic --ref ${params.pb_reference} \
         --in-tumor-fq ${fq[0]} ${fq[1]} \
         --out-vcf '${sample}_pb_mutect.vcf' \
-        --out-tumor-bam '${sample}_tumor_pb.bam' ${params.usegpu03 ? '--num-gpus 5 --gpu-devices 0,1,3,4,5' : ''} \
+        --out-tumor-bam '${sample}_tumor_pb.bam' \
         --tmp-dir /scratch/vpagano/tmp
     """
 

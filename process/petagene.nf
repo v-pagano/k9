@@ -1,7 +1,7 @@
 process bam2pgbam {
     
     input:
-        tuple val(sample), path(bam)
+        tuple val(sample), val(bam)
 
     output:
         path "*.pgbam"

@@ -51,8 +51,6 @@ process sam_merge {
 
     script:
     """
-        ${params.petagene ? 'PetaLinkMode=+write' : ''} \
-        ${params.petagene ? 'LD_PRELOAD=' + params.petalinkModule : ''} \
         samtools markdup \
             -d 2500 \
             --no-multi-dup \

@@ -91,8 +91,10 @@ workflow {
         ANNOTATION(VARIANTCALLERS.out[0])
         publishFiles = publishFiles.mix(ANNOTATION.out)
 
-        // BAM2PGBAM(MAPPING.out.bam)
-        // publishFiles = publishFiles.mix(BAM2PGBAM.out)
+        if (params.bwa || params.bwa2) {
+            BAM2PGBAM(MAPPING.out.bam)
+            publishFiles = publishFiles.mix(BAM2PGBAM.out)
+        }
 
         publishResults(publishFiles.flatten())
 
