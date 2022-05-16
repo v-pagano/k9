@@ -234,7 +234,7 @@ process pb_collectmetrics {
         path reference
 
     output:
-        file "${sample}-qc/"
+        file "${sample}-qc/*"
 
     queue params.gpuPartition
     clusterOptions "--exclusive ${params.gpuClusterOptions}"
