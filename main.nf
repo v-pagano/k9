@@ -67,7 +67,13 @@ workflow {
 
     }
 
-    if (params.inputType == 'fastq' || params.inputType == 'ubam') {
+    if (params.inputType == 'sra') {
+
+        fastq = Channel.fromSRA(params.input)
+
+    }
+
+    if (params.inputType == 'fastq' || params.inputType == 'ubam' || params.inputType == 'sra') {
 
         // if (params.petagene) {
         //     fastq = petageneExpandFasterq(fastq, params.species, params.datasteward)

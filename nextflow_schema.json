@@ -25,7 +25,8 @@
                         "fastq",
                         "bam",
                         "vcf",
-                        "ubam"
+                        "ubam",
+                        "sra"
                     ]
                 }
             }
